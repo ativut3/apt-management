@@ -16,6 +16,7 @@
  *  limitations under the License
  *
  */
+ /* global firebase */
 /* eslint-env browser */
 var App = (function() {
   'use strict';
@@ -82,6 +83,19 @@ var App = (function() {
   };
 
   return {
+    initDatabase: function() {
+      var firebaseRef = firebase.database().ref();
+      var roomsRef = firebaseRef.child('rooms');
+      var floorsRef = firebaseRef.child('floors');
+
+      roomsRef.on('value', function(snapshot) {
+        console.log(snapshot.val());
+      });
+
+      floorsRef.on('value', function(snapshot) {
+        var floorsVal = snapshot.val();
+      });
+    },
     registerDomEvent: function() {
       var showAllElement = document.querySelector('#linkShowAll');
       var paidElement = document.querySelector('#linkPaid');
@@ -104,4 +118,6 @@ var App = (function() {
   };
 })();
 
+App.initDatabase();
 App.registerDomEvent();
+
