@@ -18,6 +18,7 @@
  */
  /* global firebase */
 /* eslint-env browser */
+/* eslint max-len: [0, 150, 4] */
 var App = (function() {
   'use strict';
 
@@ -74,12 +75,40 @@ var App = (function() {
   }
 
   // Your custom JavaScript goes here
+  var parseHTML = function(str) {
+    var tmp = document.implementation.createHTMLDocument();
+    tmp.body.innerHTML = str;
+    return tmp.body.children;
+  };
   var linkHandler = function(element) {
     var previousActiveElement = document.querySelector('.mdl-navigation__link--current');
     if (previousActiveElement !== null) {
       previousActiveElement.classList.remove('mdl-navigation__link--current');
     }
     element.classList.add('mdl-navigation__link--current');
+  };
+
+  var renderFloorHeaderDom = function(numFloors) {
+    var rootContainer = document.querySelector('.mdl-layout__content');
+    rootContainer.innerHTML = '';
+    for (var i = 0; i < numFloors; i++) {
+      var floorDom = parseHTML(
+        '<div id="floor' + (i + 1) + '-header" class="mdl-grid">' +
+          '<div class="mdl-cell mdl-cell--12-col mdl-color--grey">' +
+            '<h2 class="mdl-typography--title mdl-typography--text-center">Floor ' + (i + 1) + '</h2>' +
+          '</div>' +
+        '</div>' +
+        '<div id="floor' + (i + 1) + '-card-container" class="mdl-grid">' +
+        '</div>'
+      );
+      var cnt = 0;
+      while (floorDom.length > 0) {
+        rootContainer.appendChild(floorDom[cnt]);
+      }
+    }
+  };
+  var renderCardDom = function(cardName) {
+    console.log(cardName);
   };
 
   return {
@@ -92,8 +121,19 @@ var App = (function() {
         console.log(snapshot.val());
       });
 
-      floorsRef.on('value', function(snapshot) {
-        var floorsVal = snapshot.val();
+      floorsRef.once('value', function(snapshot) {
+        var floorsObj = snapshot.val();
+        var numFloors = Object.keys(floorsObj).length;
+
+        renderFloorHeaderDom(numFloors);
+        for (var i = 0; i < numFloors; i++) {
+          var floorDataObj = floorsObj['floor' + (i + 1)];
+          for (var prop in floorDataObj) {
+            if (floorDataObj.hasOwnProperty(prop)) {
+              renderCardDom(prop);
+            }
+          }
+        }
       });
     },
     registerDomEvent: function() {
@@ -120,4 +160,3 @@ var App = (function() {
 
 App.initDatabase();
 App.registerDomEvent();
-
