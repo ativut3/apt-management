@@ -107,8 +107,19 @@ var App = (function() {
       }
     }
   };
-  var renderCardDom = function(cardName) {
-    console.log(cardName);
+  var renderCardDom = function(floorNumber, cardName) {
+    var cardContainer = document.querySelector('#floor' + floorNumber + '-card-container');
+    var cardDom = parseHTML(
+      '<div class="mdl-cell mdl-cell--4-col mdl-card mdl-shadow--2dp">' +
+        '<div class="mdl-card__title">' +
+          '<h3>-' + cardName + '-</h3>' +
+        '</div>' +
+        '<div class="mdl-card__supporting-text">' +
+          '<h2>2500 Baht</h2>' +
+        '</div>' +
+      '</div>'
+    );
+    cardContainer.appendChild(cardDom[0]);
   };
 
   return {
@@ -130,7 +141,7 @@ var App = (function() {
           var floorDataObj = floorsObj['floor' + (i + 1)];
           for (var prop in floorDataObj) {
             if (floorDataObj.hasOwnProperty(prop)) {
-              renderCardDom(prop);
+              renderCardDom(i + 1, prop);
             }
           }
         }
