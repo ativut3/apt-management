@@ -107,19 +107,44 @@ var App = (function() {
       }
     }
   };
-  var renderCardDom = function(floorNumber, cardName) {
+  var addCardOnClickEventListener = function(cardId) {
+    var card = document.querySelector('#' + cardId);
+    if (card !== null) {
+      card.addEventListener('click', function() {
+        console.log('Clicked: ' + cardId);
+      });
+    }
+  };
+  var renderCardDom = function(floorNumber, cardName, roomInfo) {
+    var cardClassName = 'mdl-color--blue-grey-100';
+    var cardId = 'room-' + cardName + '-card';
+    var price = 2500;
+    if (typeof roomInfo !== 'undefined') {
+      price = roomInfo.price;
+      switch (roomInfo.status) {
+        case 'unpaid':
+          cardClassName = 'mdl-color--red-100';
+          break;
+        case 'paid':
+          cardClassName = 'mdl-color--green-A200';
+          break;
+        default: break;
+      }
+    }
+    price = price.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
     var cardContainer = document.querySelector('#floor' + floorNumber + '-card-container');
     var cardDom = parseHTML(
-      '<div class="mdl-cell mdl-cell--4-col mdl-card mdl-shadow--2dp">' +
+      '<div id="' + cardId + '" class="mdl-cell mdl-cell--4-col mdl-card mdl-shadow--2dp ' + cardClassName + '">' +
         '<div class="mdl-card__title">' +
           '<h3>-' + cardName + '-</h3>' +
         '</div>' +
         '<div class="mdl-card__supporting-text">' +
-          '<h2>2500 Baht</h2>' +
+          '<h2>' + price + ' Baht</h2>' +
         '</div>' +
       '</div>'
     );
     cardContainer.appendChild(cardDom[0]);
+    addCardOnClickEventListener(cardId);
   };
 
   return {
@@ -128,12 +153,12 @@ var App = (function() {
       var roomsRef = firebaseRef.child('rooms');
       var floorsRef = firebaseRef.child('floors');
 
-      roomsRef.on('value', function(snapshot) {
-        console.log(snapshot.val());
-      });
-
-      floorsRef.once('value', function(snapshot) {
-        var floorsObj = snapshot.val();
+      Promise.all([
+        roomsRef.once('value'),
+        floorsRef.once('value')
+      ]).then(function(snapshots) {
+        var roomsObj = snapshots[0].val();
+        var floorsObj = snapshots[1].val();
         var numFloors = Object.keys(floorsObj).length;
 
         renderFloorHeaderDom(numFloors);
@@ -141,7 +166,7 @@ var App = (function() {
           var floorDataObj = floorsObj['floor' + (i + 1)];
           for (var prop in floorDataObj) {
             if (floorDataObj.hasOwnProperty(prop)) {
-              renderCardDom(i + 1, prop);
+              renderCardDom(i + 1, prop, roomsObj[prop]);
             }
           }
         }
