@@ -75,6 +75,13 @@ var App = (function() {
   }
 
   // Your custom JavaScript goes here
+  var showOverlay = function() {
+    document.getElementById('overlay-container').style.height = '100%';
+    document.getElementById('overlay-container').style.zIndex = "10";
+  };
+  var closeOverlay = function() {
+    document.getElementById('overlay-container').style.height = '0%';
+  };
   var parseHTML = function(str) {
     var tmp = document.implementation.createHTMLDocument();
     tmp.body.innerHTML = str;
@@ -112,6 +119,7 @@ var App = (function() {
     if (card !== null) {
       card.addEventListener('click', function() {
         console.log('Clicked: ' + cardId);
+        showOverlay();
       });
     }
   };
@@ -177,6 +185,7 @@ var App = (function() {
       var paidElement = document.querySelector('#linkPaid');
       var unpaidElement = document.querySelector('#linkUnpaid');
       var unbilledElement = document.querySelector('#linkUnbilled');
+      var overlayCloseBtn = document.querySelector('#overlay-close-btn');
 
       showAllElement.addEventListener('click', function() {
         linkHandler(showAllElement);
@@ -189,6 +198,9 @@ var App = (function() {
       });
       unbilledElement.addEventListener('click', function() {
         linkHandler(unbilledElement);
+      });
+      overlayCloseBtn.addEventListener('click', function() {
+        closeOverlay();
       });
     }
   };

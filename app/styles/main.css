@@ -222,3 +222,22 @@ html, body {
 .mdl-card:hover {
   cursor: pointer;
 }
+
+.overlay {
+  height: 0%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #bdbdbd;
+  opacity: 0.9;
+  overflow-y: hidden;
+  transition: 0.5s;
+}
+.overlay .closebtn {
+  position: absolute;
+  text-decoration: none;
+  top: 20px;
+  right: 45px;
+  font-size: 60px;
+}
