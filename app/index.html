@@ -56,9 +56,44 @@
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <div id="overlay-container" class="overlay">
         <a id="overlay-close-btn" href="#" class="closebtn">&times;</a>
-        <div class="mdl-card mdl-shadow--2dp">
-          <div class="mdl-card__title">
-            Yo
+        <div class="overlay-content">
+          <div class="mdl-card mdl-shadow--6dp">
+            <div class="mdl-card__title mdl-color--primary mdl-color-text--white">
+              <h2 class="mdl-card__title-text"></h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <form action="#">
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-paid">
+                  <input type="radio" id="option-paid" class="mdl-radio__button" name="status" value="1" checked>
+                  <span class="mdl-radio__label">Paid</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unpaid">
+                  <input type="radio" id="option-unpaid" class="mdl-radio__button" name="status" value="2">
+                  <span class="mdl-radio__label">Unpaid</span>
+                </label>
+                <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unbilled">
+                  <input type="radio" id="option-unbilled" class="mdl-radio__button" name="status" value="3">
+                  <span class="mdl-radio__label">Unbilled</span>
+                </label>
+                <div>
+                  <img src="images/SCB.png" width="60" height="60">
+                  <img src="images/BBL.png" width="60" height="60">
+                  <img src="images/kbank.png" width="60" height="60">
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                  <input class="mdl-textfield__input" type="text" id="username" />
+                  <label class="mdl-textfield__label" for="username">Username</label>
+                </div>
+                <div class="mdl-textfield mdl-js-textfield">
+                  <input class="mdl-textfield__input" type="password" id="userpass" />
+                  <label class="mdl-textfield__label" for="userpass">Password</label>
+                </div>
+              </form>
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Save</button>
+              <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Cancel</button>
+            </div>
           </div>
         </div>
       </div>

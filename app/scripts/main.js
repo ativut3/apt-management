@@ -77,7 +77,7 @@ var App = (function() {
   // Your custom JavaScript goes here
   var showOverlay = function() {
     document.getElementById('overlay-container').style.height = '100%';
-    document.getElementById('overlay-container').style.zIndex = "10";
+    document.getElementById('overlay-container').style.zIndex = '10';
   };
   var closeOverlay = function() {
     document.getElementById('overlay-container').style.height = '0%';
