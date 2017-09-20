@@ -75,6 +75,16 @@ var App = (function() {
   }
 
   // Your custom JavaScript goes here
+  var roomModel = [];
+
+  var addToDataModel = function(floorNo, roomNo, details) {
+    roomModel.push({
+      floor: floorNo,
+      room: roomNo,
+      price: details.price === undefined ? 0 : details.price,
+      status: details.status
+    });
+  };
   var showOverlay = function() {
     document.getElementById('overlay-container').style.height = '100%';
     document.getElementById('overlay-container').style.zIndex = '10';
@@ -114,11 +124,35 @@ var App = (function() {
       }
     }
   };
+  var renderRoomCardDom = function(cardId) {
+    // select from data model
+    var roomNo = cardId.match('-([^;]+)-')[1];
+    var filteredModel = roomModel.filter(function(obj) {
+      return obj.room === roomNo;
+    });
+    if (filteredModel.length <= 0) {
+      console.log('Something is wrong with the data model.');
+      return;
+    }
+    // we are certain that the result will be just one card
+    // var roomPrice = filteredModel[0].price;
+    var roomStatus = filteredModel[0].status;
+
+    var roomCardHeader = document.getElementById('room-card-header');
+    roomCardHeader.innerHTML = 'Room ' + roomNo;
+
+    // https://stackoverflow.com/questions/35783797/set-material-design-lite-radio-button-option-with-jquery
+    if (roomStatus === 'unpaid') {
+      var unpaidRadio = document.getElementById('option-unpaid');
+      unpaidRadio.parentNode.MaterialRadio.check();
+    }
+  };
   var addCardOnClickEventListener = function(cardId) {
     var card = document.querySelector('#' + cardId);
     if (card !== null) {
       card.addEventListener('click', function() {
         console.log('Clicked: ' + cardId);
+        renderRoomCardDom(cardId);
         showOverlay();
       });
     }
@@ -174,6 +208,7 @@ var App = (function() {
           var floorDataObj = floorsObj['floor' + (i + 1)];
           for (var prop in floorDataObj) {
             if (floorDataObj.hasOwnProperty(prop)) {
+              addToDataModel(i + 1, prop, roomsObj[prop]);
               renderCardDom(i + 1, prop, roomsObj[prop]);
             }
           }
