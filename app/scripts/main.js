@@ -135,11 +135,18 @@ var App = (function() {
       return;
     }
     // we are certain that the result will be just one card
-    // var roomPrice = filteredModel[0].price;
+    var roomPrice = filteredModel[0].price.toFixed(2);
     var roomStatus = filteredModel[0].status;
 
     var roomCardHeader = document.getElementById('room-card-header');
+    var roomPriceContainer = document.getElementById('room-price-container');
+    //var roomPriceInput = document.getElementById('room-price');
     roomCardHeader.innerHTML = 'Room ' + roomNo;
+
+    // fill in the price
+    // https://github.com/google/material-design-lite/issues/1287
+    //roomPriceInput.value = roomPrice;
+    roomPriceContainer.MaterialTextfield.change(roomPrice);
 
     // https://stackoverflow.com/questions/35783797/set-material-design-lite-radio-button-option-with-jquery
     if (roomStatus === 'unpaid') {
