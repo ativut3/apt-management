@@ -237,10 +237,9 @@ html, body {
   align-items: center;
   justify-content: center;
   position: relative;
-  top: 25%;
+  top: 10%;
   width: 100%;
   text-align: center;
-  margin-top: 30px;
 }
 .overlay-content .mdl-card {
   margin: auto;
@@ -251,4 +250,8 @@ html, body {
   top: 20px;
   right: 45px;
   font-size: 60px;
+}
+
+.payment-method {
+  display: inline-block;
 }

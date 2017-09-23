@@ -140,18 +140,26 @@ var App = (function() {
 
     var roomCardHeader = document.getElementById('room-card-header');
     var roomPriceContainer = document.getElementById('room-price-container');
-    //var roomPriceInput = document.getElementById('room-price');
     roomCardHeader.innerHTML = 'Room ' + roomNo;
 
     // fill in the price
     // https://github.com/google/material-design-lite/issues/1287
-    //roomPriceInput.value = roomPrice;
     roomPriceContainer.MaterialTextfield.change(roomPrice);
 
     // https://stackoverflow.com/questions/35783797/set-material-design-lite-radio-button-option-with-jquery
+    var paymentMethodContainer = document.querySelector('.payment-method-container');
     if (roomStatus === 'unpaid') {
       var unpaidRadio = document.getElementById('option-unpaid');
       unpaidRadio.parentNode.MaterialRadio.check();
+      paymentMethodContainer.style.display = 'none';
+    } else if (roomStatus === 'paid') {
+      var paidRadio = document.getElementById('option-paid');
+      paidRadio.parentNode.MaterialRadio.check();
+      paymentMethodContainer.style.display = 'block';
+    } else if (roomStatus === 'unbilled') {
+      var unbilledRadio = document.getElementById('option-unbilled');
+      unbilledRadio.parentNode.MaterialRadio.check();
+      paymentMethodContainer.style.display = 'none';
     }
   };
   var addCardOnClickEventListener = function(cardId) {
@@ -195,6 +203,15 @@ var App = (function() {
     cardContainer.appendChild(cardDom[0]);
     addCardOnClickEventListener(cardId);
   };
+  var radioHandler = function(event) {
+    var changedValue = event.currentTarget.value;
+    var paymentMethodContainer = document.querySelector('.payment-method-container');
+    if (changedValue === 'paid') {
+      paymentMethodContainer.style.display = 'block';
+    } else {
+      paymentMethodContainer.style.display = 'none';
+    }
+  };
 
   return {
     initDatabase: function() {
@@ -227,7 +244,11 @@ var App = (function() {
       var paidElement = document.querySelector('#linkPaid');
       var unpaidElement = document.querySelector('#linkUnpaid');
       var unbilledElement = document.querySelector('#linkUnbilled');
+
       var overlayCloseBtn = document.querySelector('#overlay-close-btn');
+      var optionPaidElement = document.querySelector('#option-paid');
+      var optionUnpaidElement = document.querySelector('#option-unpaid');
+      var optionUnbilledElement = document.querySelector('#option-unbilled');
 
       showAllElement.addEventListener('click', function() {
         linkHandler(showAllElement);
@@ -243,6 +264,15 @@ var App = (function() {
       });
       overlayCloseBtn.addEventListener('click', function() {
         closeOverlay();
+      });
+      optionPaidElement.addEventListener('change', function(event) {
+        radioHandler(event);
+      });
+      optionUnpaidElement.addEventListener('change', function(event) {
+        radioHandler(event);
+      });
+      optionUnbilledElement.addEventListener('change', function(event) {
+        radioHandler(event);
       });
     }
   };

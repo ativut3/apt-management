@@ -68,21 +68,30 @@
                   <label class="mdl-textfield__label" for="room-price">Price (Baht)</label>
                 </div>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-paid">
-                  <input type="radio" id="option-paid" class="mdl-radio__button" name="status" value="1">
+                  <input type="radio" id="option-paid" class="mdl-radio__button" name="status" value="paid">
                   <span class="mdl-radio__label">Paid</span>
                 </label>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unpaid">
-                  <input type="radio" id="option-unpaid" class="mdl-radio__button" name="status" value="2">
+                  <input type="radio" id="option-unpaid" class="mdl-radio__button" name="status" value="unpaid">
                   <span class="mdl-radio__label">Unpaid</span>
                 </label>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-unbilled">
-                  <input type="radio" id="option-unbilled" class="mdl-radio__button" name="status" value="3">
+                  <input type="radio" id="option-unbilled" class="mdl-radio__button" name="status" value="unbilled">
                   <span class="mdl-radio__label">Unbilled</span>
                 </label>
-                <div>
-                  <img src="images/SCB.png" width="60" height="60">
-                  <img src="images/BBL.png" width="60" height="60">
-                  <img src="images/kbank.png" width="60" height="60">
+                <div class="payment-method-container">
+                  <div class="payment-method">
+                    <img src="images/SCB.png" width="60" height="60">
+                  </div>
+                  <div class="payment-method">
+                    <img src="images/BBL.png" width="60" height="60">
+                  </div>
+                  <div class="payment-method">
+                    <img src="images/kbank.png" width="60" height="60">
+                  </div>
+                  <div class="payment-method">
+                    <img src="images/cash.png" width="60" height="60">
+                  </div>
                 </div>
                 <div class="mdl-textfield mdl-js-textfield">
                   <input class="mdl-textfield__input" type="text" id="username" />
