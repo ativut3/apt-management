@@ -81,31 +81,27 @@
                 </label>
                 <div class="payment-method-container">
                   <div class="payment-method">
-                    <img src="images/SCB.png" width="60" height="60">
+                    <img id="scb" class="grayscale" src="images/SCB.png" width="60" height="60">
                   </div>
                   <div class="payment-method">
-                    <img src="images/BBL.png" width="60" height="60">
+                    <img id="bbl" class="grayscale" src="images/BBL.png" width="60" height="60">
                   </div>
                   <div class="payment-method">
-                    <img src="images/kbank.png" width="60" height="60">
+                    <img id="kbank" class="grayscale" src="images/kbank.png" width="60" height="60">
                   </div>
                   <div class="payment-method">
-                    <img src="images/cash.png" width="60" height="60">
+                    <img id="cash" class="grayscale" src="images/cash.png" width="60" height="60">
                   </div>
                 </div>
-                <div class="mdl-textfield mdl-js-textfield">
-                  <input class="mdl-textfield__input" type="text" id="username" />
-                  <label class="mdl-textfield__label" for="username">Username</label>
-                </div>
-                <div class="mdl-textfield mdl-js-textfield">
-                  <input class="mdl-textfield__input" type="password" id="userpass" />
-                  <label class="mdl-textfield__label" for="userpass">Password</label>
+                <div id="date-paid-container" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                  <input class="mdl-textfield__input" type="date" id="date-paid">
+                  <label class="mdl-textfield__label" for="date-paid">Date</label>
                 </div>
               </form>
             </div>
             <div class="mdl-card__actions mdl-card--border">
-              <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Save</button>
-              <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Cancel</button>
+              <button id="save-btn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Save</button>
+              <button id="cancel-btn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Cancel</button>
             </div>
           </div>
         </div>

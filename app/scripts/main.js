@@ -76,6 +76,7 @@ var App = (function() {
 
   // Your custom JavaScript goes here
   var roomModel = [];
+  var currentActiveCard = null;
 
   var addToDataModel = function(floorNo, roomNo, details) {
     roomModel.push({
@@ -135,6 +136,7 @@ var App = (function() {
       return;
     }
     // we are certain that the result will be just one card
+    currentActiveCard = filteredModel[0];
     var roomPrice = filteredModel[0].price.toFixed(2);
     var roomStatus = filteredModel[0].status;
 
@@ -148,18 +150,27 @@ var App = (function() {
 
     // https://stackoverflow.com/questions/35783797/set-material-design-lite-radio-button-option-with-jquery
     var paymentMethodContainer = document.querySelector('.payment-method-container');
+    var datePaidContainer = document.getElementById('date-paid-container');
+    var dateInput = document.getElementById('date-paid');
+    var today = new Date();
+    var todayString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+    datePaidContainer.MaterialTextfield.change(todayString);
+
     if (roomStatus === 'unpaid') {
       var unpaidRadio = document.getElementById('option-unpaid');
       unpaidRadio.parentNode.MaterialRadio.check();
       paymentMethodContainer.style.display = 'none';
+      datePaidContainer.style.display = 'none';
     } else if (roomStatus === 'paid') {
       var paidRadio = document.getElementById('option-paid');
       paidRadio.parentNode.MaterialRadio.check();
       paymentMethodContainer.style.display = 'block';
+      datePaidContainer.style.display = 'block';
     } else if (roomStatus === 'unbilled') {
       var unbilledRadio = document.getElementById('option-unbilled');
       unbilledRadio.parentNode.MaterialRadio.check();
       paymentMethodContainer.style.display = 'none';
+      datePaidContainer.style.display = 'none';
     }
   };
   var addCardOnClickEventListener = function(cardId) {
@@ -203,13 +214,46 @@ var App = (function() {
     cardContainer.appendChild(cardDom[0]);
     addCardOnClickEventListener(cardId);
   };
-  var radioHandler = function(event) {
+  var radioHandler = function(event, currentActiveCard) {
     var changedValue = event.currentTarget.value;
     var paymentMethodContainer = document.querySelector('.payment-method-container');
+    var datePaidContainer = document.getElementById('date-paid-container');
+    var paymentMethod = currentActiveCard.paymentMethod;
     if (changedValue === 'paid') {
       paymentMethodContainer.style.display = 'block';
+      datePaidContainer.style.display = 'block';
+      if (paymentMethod === undefined) {
+        document.getElementById('scb').classList.add('grayscale');
+        document.getElementById('bbl').classList.add('grayscale');
+        document.getElementById('kbank').classList.add('grayscale');
+        document.getElementById('cash').classList.remove('grayscale');
+      } else {
+        document.getElementById(paymentMethod).classList.remove('grayscale');
+      }
     } else {
       paymentMethodContainer.style.display = 'none';
+      datePaidContainer.style.display = 'none';
+    }
+  };
+  var paymentMethodClickHandler = function(event) {
+    var paymentMethodId = event.currentTarget.id;
+    document.getElementById(paymentMethodId).classList.remove('grayscale');
+    if (paymentMethodId === 'scb') {
+      document.getElementById('bbl').classList.add('grayscale');
+      document.getElementById('kbank').classList.add('grayscale');
+      document.getElementById('cash').classList.add('grayscale');
+    } else if (paymentMethodId === 'bbl') {
+      document.getElementById('scb').classList.add('grayscale');
+      document.getElementById('kbank').classList.add('grayscale');
+      document.getElementById('cash').classList.add('grayscale');
+    } else if (paymentMethodId === 'kbank') {
+      document.getElementById('bbl').classList.add('grayscale');
+      document.getElementById('scb').classList.add('grayscale');
+      document.getElementById('cash').classList.add('grayscale');
+    } else if (paymentMethodId === 'cash') {
+      document.getElementById('bbl').classList.add('grayscale');
+      document.getElementById('kbank').classList.add('grayscale');
+      document.getElementById('scb').classList.add('grayscale');
     }
   };
 
@@ -249,6 +293,11 @@ var App = (function() {
       var optionPaidElement = document.querySelector('#option-paid');
       var optionUnpaidElement = document.querySelector('#option-unpaid');
       var optionUnbilledElement = document.querySelector('#option-unbilled');
+      var scbIcon = document.querySelector('#scb');
+      var bblIcon = document.querySelector('#bbl');
+      var kbankIcon = document.querySelector('#kbank');
+      var cashIcon = document.querySelector('#cash');
+      var cancelBtn = document.querySelector('#cancel-btn');
 
       showAllElement.addEventListener('click', function() {
         linkHandler(showAllElement);
@@ -262,18 +311,21 @@ var App = (function() {
       unbilledElement.addEventListener('click', function() {
         linkHandler(unbilledElement);
       });
-      overlayCloseBtn.addEventListener('click', function() {
-        closeOverlay();
-      });
+      overlayCloseBtn.addEventListener('click', closeOverlay);
+      cancelBtn.addEventListener('click', closeOverlay);
       optionPaidElement.addEventListener('change', function(event) {
-        radioHandler(event);
+        radioHandler(event, currentActiveCard);
       });
       optionUnpaidElement.addEventListener('change', function(event) {
-        radioHandler(event);
+        radioHandler(event, currentActiveCard);
       });
       optionUnbilledElement.addEventListener('change', function(event) {
-        radioHandler(event);
+        radioHandler(event, currentActiveCard);
       });
+      scbIcon.addEventListener('click', paymentMethodClickHandler);
+      bblIcon.addEventListener('click', paymentMethodClickHandler);
+      kbankIcon.addEventListener('click', paymentMethodClickHandler);
+      cashIcon.addEventListener('click', paymentMethodClickHandler);
     }
   };
 })();

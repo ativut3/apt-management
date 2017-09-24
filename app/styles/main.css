@@ -251,7 +251,16 @@ html, body {
   right: 45px;
   font-size: 60px;
 }
-
+.payment-method-container {
+  margin-top: 10px;
+}
 .payment-method {
   display: inline-block;
+}
+.grayscale {
+  -webkit-filter: grayscale(100%);
+  -moz-filter: grayscale(100%);
+  -ms-filter: grayscale(100%);
+  -o-filter: grayscale(100%);
+  opacity: 0.5;
 }
