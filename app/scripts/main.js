@@ -104,6 +104,7 @@ var App = (function() {
       previousActiveElement.classList.remove('mdl-navigation__link--current');
     }
     element.classList.add('mdl-navigation__link--current');
+    var filterId = element.id;
   };
 
   var renderFloorHeaderDom = function(numFloors) {
@@ -151,7 +152,6 @@ var App = (function() {
     // https://stackoverflow.com/questions/35783797/set-material-design-lite-radio-button-option-with-jquery
     var paymentMethodContainer = document.querySelector('.payment-method-container');
     var datePaidContainer = document.getElementById('date-paid-container');
-    var dateInput = document.getElementById('date-paid');
     var today = new Date();
     var todayString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     datePaidContainer.MaterialTextfield.change(todayString);
