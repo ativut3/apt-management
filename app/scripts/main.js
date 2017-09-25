@@ -76,7 +76,9 @@ var App = (function() {
 
   // Your custom JavaScript goes here
   var roomModel = [];
+  var rooms = [];
   var currentActiveCard = null;
+  var filterMode = 'linkShowAll';
 
   var addToDataModel = function(floorNo, roomNo, details) {
     roomModel.push({
@@ -85,6 +87,9 @@ var App = (function() {
       price: details.price === undefined ? 0 : details.price,
       status: details.status
     });
+  };
+  var clearDataModel = function() {
+    roomModel.length = 0;
   };
   var showOverlay = function() {
     document.getElementById('overlay-container').style.height = '100%';
@@ -97,34 +102,6 @@ var App = (function() {
     var tmp = document.implementation.createHTMLDocument();
     tmp.body.innerHTML = str;
     return tmp.body.children;
-  };
-  var linkHandler = function(element) {
-    var previousActiveElement = document.querySelector('.mdl-navigation__link--current');
-    if (previousActiveElement !== null) {
-      previousActiveElement.classList.remove('mdl-navigation__link--current');
-    }
-    element.classList.add('mdl-navigation__link--current');
-    var filterId = element.id;
-  };
-
-  var renderFloorHeaderDom = function(numFloors) {
-    var rootContainer = document.querySelector('.mdl-layout__content');
-    rootContainer.innerHTML = '';
-    for (var i = 0; i < numFloors; i++) {
-      var floorDom = parseHTML(
-        '<div id="floor' + (i + 1) + '-header" class="mdl-grid">' +
-          '<div class="mdl-cell mdl-cell--12-col mdl-color--grey">' +
-            '<h2 class="mdl-typography--title mdl-typography--text-center">Floor ' + (i + 1) + '</h2>' +
-          '</div>' +
-        '</div>' +
-        '<div id="floor' + (i + 1) + '-card-container" class="mdl-grid">' +
-        '</div>'
-      );
-      var cnt = 0;
-      while (floorDom.length > 0) {
-        rootContainer.appendChild(floorDom[cnt]);
-      }
-    }
   };
   var renderRoomCardDom = function(cardId) {
     // select from data model
@@ -183,18 +160,40 @@ var App = (function() {
       });
     }
   };
+  var renderFloorHeaderDom = function(numFloors) {
+    var rootContainer = document.querySelector('.mdl-layout__content');
+    rootContainer.innerHTML = '';
+    for (var i = 0; i < numFloors; i++) {
+      var floorDom = parseHTML(
+        '<div id="floor' + (i + 1) + '-header" class="mdl-grid">' +
+          '<div class="mdl-cell mdl-cell--12-col mdl-color--indigo">' +
+            '<h2 class="mdl-color-text--blue-grey-50 mdl-typography--title mdl-typography--text-center">Floor ' + (i + 1) + '</h2>' +
+          '</div>' +
+        '</div>' +
+        '<div id="floor' + (i + 1) + '-card-container" class="mdl-grid">' +
+        '</div>'
+      );
+      var cnt = 0;
+      while (floorDom.length > 0) {
+        rootContainer.appendChild(floorDom[cnt]);
+      }
+    }
+  };
   var renderCardDom = function(floorNumber, cardName, roomInfo) {
-    var cardClassName = 'mdl-color--blue-grey-100';
+    var cardClassName = '.mdl-color--light-blue-900';
     var cardId = 'room-' + cardName + '-card';
     var price = 2500;
     if (typeof roomInfo !== 'undefined') {
       price = roomInfo.price;
       switch (roomInfo.status) {
         case 'unpaid':
-          cardClassName = 'mdl-color--red-100';
+          cardClassName = 'mdl-color--red-400';
           break;
         case 'paid':
-          cardClassName = 'mdl-color--green-A200';
+          cardClassName = 'mdl-color--green-A400';
+          break;
+        case 'unbilled':
+          cardClassName = 'mdl-color--blue-200';
           break;
         default: break;
       }
@@ -202,23 +201,65 @@ var App = (function() {
     price = price.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
     var cardContainer = document.querySelector('#floor' + floorNumber + '-card-container');
     var cardDom = parseHTML(
-      '<div id="' + cardId + '" class="mdl-cell mdl-cell--4-col mdl-card mdl-shadow--2dp ' + cardClassName + '">' +
-        '<div class="mdl-card__title">' +
+      '<div id="' + cardId + '" class="mdl-cell mdl-cell--2-col mdl-card mdl-shadow--2dp ' + cardClassName + '">' +
+        '<div class="mdl-color-text--blue-grey-50 mdl-card__title">' +
           '<h3>-' + cardName + '-</h3>' +
         '</div>' +
         '<div class="mdl-card__supporting-text">' +
-          '<h2>' + price + ' Baht</h2>' +
+          '<h4>' + price + ' Baht</h4>' +
         '</div>' +
       '</div>'
     );
     cardContainer.appendChild(cardDom[0]);
     addCardOnClickEventListener(cardId);
   };
+  var linkHandler = function(element) {
+    var previousActiveElement = document.querySelector('.mdl-navigation__link--current');
+    if (previousActiveElement !== null) {
+      previousActiveElement.classList.remove('mdl-navigation__link--current');
+    }
+    element.classList.add('mdl-navigation__link--current');
+    var filterId = element.id;
+    var filteredStatusModel = [];
+    var filteredFloors = [];
+    if (filterId === 'linkPaid') {
+      filteredStatusModel = roomModel.filter(function(obj) {
+        return obj.status === 'paid';
+      });
+    } else if (filterId === 'linkShowAll') {
+      filteredStatusModel = roomModel;
+    } else if (filterId === 'linkUnpaid') {
+      filteredStatusModel = roomModel.filter(function(obj) {
+        return obj.status === 'unpaid';
+      });
+    } else if (filterId === 'linkUnbilled') {
+      filteredStatusModel = roomModel.filter(function(obj) {
+        return obj.status === 'unbilled';
+      });
+    }
+    var i;
+    for (i = 0; i < filteredStatusModel.length; i++) {
+      if (filteredFloors.indexOf(filteredStatusModel[i].floor) < 0) {
+        filteredFloors.push(filteredStatusModel[i].floor);
+      }
+    }
+    renderFloorHeaderDom(3);
+    for (i = 0; i < filteredStatusModel.length; i++) {
+      var roomNumber = filteredStatusModel[i].room;
+      var floorNumber = filteredStatusModel[i].floor;
+      renderCardDom(floorNumber, roomNumber, filteredStatusModel[i]);
+    }
+
+    // after click, close drawer
+    var drawer = document.querySelector('.mdl-layout');
+    drawer.MaterialLayout.toggleDrawer();
+  };
   var radioHandler = function(event, currentActiveCard) {
     var changedValue = event.currentTarget.value;
     var paymentMethodContainer = document.querySelector('.payment-method-container');
     var datePaidContainer = document.getElementById('date-paid-container');
     var paymentMethod = currentActiveCard.paymentMethod;
+    currentActiveCard.status = changedValue;
     if (changedValue === 'paid') {
       paymentMethodContainer.style.display = 'block';
       datePaidContainer.style.display = 'block';
@@ -239,24 +280,41 @@ var App = (function() {
     var paymentMethodId = event.currentTarget.id;
     document.getElementById(paymentMethodId).classList.remove('grayscale');
     if (paymentMethodId === 'scb') {
+      currentActiveCard.paymentMethod = 'scb';
       document.getElementById('bbl').classList.add('grayscale');
       document.getElementById('kbank').classList.add('grayscale');
       document.getElementById('cash').classList.add('grayscale');
     } else if (paymentMethodId === 'bbl') {
+      currentActiveCard.paymentMethod = 'bbl';
       document.getElementById('scb').classList.add('grayscale');
       document.getElementById('kbank').classList.add('grayscale');
       document.getElementById('cash').classList.add('grayscale');
     } else if (paymentMethodId === 'kbank') {
+      currentActiveCard.paymentMethod = 'kbank';
       document.getElementById('bbl').classList.add('grayscale');
       document.getElementById('scb').classList.add('grayscale');
       document.getElementById('cash').classList.add('grayscale');
     } else if (paymentMethodId === 'cash') {
+      currentActiveCard.paymentMethod = 'cash';
       document.getElementById('bbl').classList.add('grayscale');
       document.getElementById('kbank').classList.add('grayscale');
       document.getElementById('scb').classList.add('grayscale');
     }
   };
-
+  var saveToFirebase = function() {
+    console.log(currentActiveCard);
+    var roomNo = currentActiveCard.room;
+    var price = currentActiveCard.price;
+    var status = currentActiveCard.status;
+    var paymentMethod = status === 'paid' ? currentActiveCard.paymentMethod : null;
+    var firebaseRef = firebase.database().ref('rooms/' + roomNo);
+    firebaseRef.set({
+      price: price,
+      status: status,
+      paymentMethod: paymentMethod
+    });
+    closeOverlay();
+  };
   return {
     initDatabase: function() {
       var firebaseRef = firebase.database().ref();
@@ -272,15 +330,51 @@ var App = (function() {
         var numFloors = Object.keys(floorsObj).length;
 
         renderFloorHeaderDom(numFloors);
+        clearDataModel();
         for (var i = 0; i < numFloors; i++) {
           var floorDataObj = floorsObj['floor' + (i + 1)];
           for (var prop in floorDataObj) {
             if (floorDataObj.hasOwnProperty(prop)) {
+              rooms.push(prop);
               addToDataModel(i + 1, prop, roomsObj[prop]);
               renderCardDom(i + 1, prop, roomsObj[prop]);
             }
           }
         }
+        // Code which is listening to firebase database change
+        roomsRef.on('value', function(snapshot) {
+          console.log(snapshot.val());
+          var filteredStatusModel = [];
+          var roomsObj = snapshot.val();
+          renderFloorHeaderDom(3);
+          clearDataModel();
+          var i;
+          for (i = 0; i < rooms.length; i++) {
+            var floorNo = parseInt(rooms[i].charAt(0), 10);
+            addToDataModel(floorNo, rooms[i], roomsObj[rooms[i]]);
+          }
+          // filter based on selection
+          if (filterMode === 'linkPaid') {
+            filteredStatusModel = roomModel.filter(function(obj) {
+              return obj.status === 'paid';
+            });
+          } else if (filterMode === 'linkShowAll') {
+            filteredStatusModel = roomModel;
+          } else if (filterMode === 'linkUnpaid') {
+            filteredStatusModel = roomModel.filter(function(obj) {
+              return obj.status === 'unpaid';
+            });
+          } else if (filterMode === 'linkUnbilled') {
+            filteredStatusModel = roomModel.filter(function(obj) {
+              return obj.status === 'unbilled';
+            });
+          }
+          for (i = 0; i < filteredStatusModel.length; i++) {
+            var roomNumber = filteredStatusModel[i].room;
+            var floorNumber = filteredStatusModel[i].floor;
+            renderCardDom(floorNumber, roomNumber, filteredStatusModel[i]);
+          }
+        });
       });
     },
     registerDomEvent: function() {
@@ -293,26 +387,44 @@ var App = (function() {
       var optionPaidElement = document.querySelector('#option-paid');
       var optionUnpaidElement = document.querySelector('#option-unpaid');
       var optionUnbilledElement = document.querySelector('#option-unbilled');
+      var roomPriceInput = document.querySelector('#room-price');
       var scbIcon = document.querySelector('#scb');
       var bblIcon = document.querySelector('#bbl');
       var kbankIcon = document.querySelector('#kbank');
       var cashIcon = document.querySelector('#cash');
+      var saveBtn = document.querySelector('#save-btn');
       var cancelBtn = document.querySelector('#cancel-btn');
 
       showAllElement.addEventListener('click', function() {
+        filterMode = 'linkShowAll';
         linkHandler(showAllElement);
       });
       paidElement.addEventListener('click', function() {
+        filterMode = 'linkPaid';
         linkHandler(paidElement);
       });
       unpaidElement.addEventListener('click', function() {
+        filterMode = 'linkUnpaid';
         linkHandler(unpaidElement);
       });
       unbilledElement.addEventListener('click', function() {
+        filterMode = 'linkUnbilled';
         linkHandler(unbilledElement);
       });
       overlayCloseBtn.addEventListener('click', closeOverlay);
       cancelBtn.addEventListener('click', closeOverlay);
+      saveBtn.addEventListener('click', saveToFirebase);
+      roomPriceInput.addEventListener('keyup', function(event) {
+        if (event.keyCode === 13) {
+          roomPriceInput.blur();
+        }
+      });
+      roomPriceInput.addEventListener('blur', function() {
+        var formattedPrice = roomPriceInput.valueAsNumber.toFixed(2);
+        var roomPriceContainer = document.getElementById('room-price-container');
+        roomPriceContainer.MaterialTextfield.change(formattedPrice);
+        currentActiveCard.price = roomPriceInput.valueAsNumber;
+      });
       optionPaidElement.addEventListener('change', function(event) {
         radioHandler(event, currentActiveCard);
       });
