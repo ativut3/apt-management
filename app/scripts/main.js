@@ -299,7 +299,7 @@ var App = (function() {
     var drawer = document.querySelector('.mdl-layout');
     drawer.MaterialLayout.toggleDrawer();
   };
-  var radioHandler = function(event, currentActiveCard) {
+  var radioHandler = function(event) {
     var changedValue = event.currentTarget.value;
     var paymentMethodContainer = document.querySelector('.payment-method-container');
     var datePaidContainer = document.getElementById('date-paid-container');
@@ -471,22 +471,27 @@ var App = (function() {
         }
       });
       roomPriceInput.addEventListener('blur', function() {
-        var formattedPrice = this.valueAsNumber.toFixed(2);
         var roomPriceContainer = document.getElementById('room-price-container');
-        roomPriceContainer.MaterialTextfield.change(formattedPrice);
-        tmpData.price = this.valueAsNumber;
+        if (isNaN(this.valueAsNumber) || this.validity.valid === false) {
+          roomPriceContainer.MaterialTextfield.change('0.00');
+          tmpData.price = 0;
+        } else {
+          var formattedPrice = this.valueAsNumber.toFixed(2);
+          roomPriceContainer.MaterialTextfield.change(formattedPrice);
+          tmpData.price = this.valueAsNumber;
+        }
       });
       datePaidInput.addEventListener('blur', function() {
         tmpData.payDate = this.value;
       });
       optionPaidElement.addEventListener('change', function(event) {
-        radioHandler(event, currentActiveCard);
+        radioHandler(event);
       });
       optionUnpaidElement.addEventListener('change', function(event) {
-        radioHandler(event, currentActiveCard);
+        radioHandler(event);
       });
       optionUnbilledElement.addEventListener('change', function(event) {
-        radioHandler(event, currentActiveCard);
+        radioHandler(event);
       });
       scbIcon.addEventListener('click', paymentMethodClickHandler);
       bblIcon.addEventListener('click', paymentMethodClickHandler);

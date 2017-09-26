@@ -280,3 +280,9 @@ html, body {
 .mdl-radio__label {
   margin-right: 5px;
 }
+.spinner-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 30px;
+}
