@@ -16,17 +16,17 @@
     <!-- Add to homescreen for Chrome on Android -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="RB Place">
-    <link rel="icon" sizes="192x192" href="images/logo.png">
+    <link rel="icon" sizes="192x192" href="images/touch/android-chrome-144x144.png">
 
     <!-- Add to homescreen for Safari on iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="RB Place">
-    <link rel="apple-touch-icon" href="images/logo.png">
+    <link rel="apple-touch-icon" href="images/touch/apple-touch-icon-152x152.png">
 
     <!-- Tile icon for Win8 (144x144 + tile color) -->
-    <meta name="msapplication-TileImage" content="images/logo.png">
-    <meta name="msapplication-TileColor" content="#2F3BA2">
+    <meta name="msapplication-TileImage" content="images/touch/android-chrome-144x144.png">
+    <meta name="msapplication-TileColor" content="#FFF45B">
 
     <!-- Color the status bar on mobile devices -->
     <meta name="theme-color" content="#2F3BA2">
@@ -64,7 +64,7 @@
             </div>
             <div class="mdl-card__supporting-text">
                 <div id="room-price-container" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                  <input class="mdl-textfield__input" type="number" step="any" min="0" id="room-price">
+                  <input class="mdl-textfield__input" type="number" step="any" min="0" pattern="\d*" id="room-price">
                   <label class="mdl-textfield__label" for="room-price">Price (Baht)</label>
                 </div>
                 <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-paid">
