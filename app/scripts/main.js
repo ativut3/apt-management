@@ -304,11 +304,18 @@ var App = (function() {
     var paymentMethodContainer = document.querySelector('.payment-method-container');
     var datePaidContainer = document.getElementById('date-paid-container');
     var paymentMethod = tmpData.paymentMethod;
+    var payDate = tmpData.payDate;
     tmpData.status = changedValue;
     if (changedValue === 'paid') {
       paymentMethodContainer.style.display = 'block';
       datePaidContainer.style.display = 'block';
+      if (payDate === undefined) {
+        var today = new Date();
+        var todayString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+        tmpData.payDate = todayString;
+      }
       if (paymentMethod === undefined) {
+        tmpData.paymentMethod = 'cash';
         document.getElementById('scb').classList.add('grayscale');
         document.getElementById('bbl').classList.add('grayscale');
         document.getElementById('kbank').classList.add('grayscale');
