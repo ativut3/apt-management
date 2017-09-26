@@ -16,7 +16,7 @@
  *  limitations under the License
  *
  */
- /* global firebase */
+ /* global firebase, $ */
 /* eslint-env browser */
 /* eslint max-len: [0, 150, 4] */
 var App = (function() {
@@ -508,5 +508,8 @@ var App = (function() {
   };
 })();
 
-App.initDatabase();
-App.registerDomEvent();
+$(document).ready(function() {
+  App.initDatabase();
+  App.registerDomEvent();
+});
+

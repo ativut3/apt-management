@@ -51,6 +51,7 @@
 
     <!-- Your styles -->
     <link rel="stylesheet" href="https://cdn.materialdesignicons.com/2.0.46/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.material.min.css">
     <link rel="stylesheet" href="styles/main.css">
   </head>
   <body>
@@ -115,11 +116,13 @@
       </header>
       <div class="mdl-layout__drawer">
         <span class="mdl-layout__title">RB Place</span>
-        <nav class="mdl-navigation">
+        <nav class="mdl-navigation mdl-layout-spacer">
           <a id="linkShowAll" class="mdl-navigation__link mdl-navigation__link--current" href="#">Show all</a>
           <a id="linkPaid" class="mdl-navigation__link" href="#">Paid</a>
           <a id="linkUnpaid" class="mdl-navigation__link" href="#">Unpaid</a>
           <a id="linkUnbilled" class="mdl-navigation__link" href="#">Unbilled</a>
+          <div class="mdl-layout-spacer"></div>
+          <a id="linkLedger" class="mdl-navigation__link" href="#">Ledger</a>
         </nav>
       </div>
       <main class="mdl-layout__content">
@@ -142,6 +145,8 @@
       firebase.initializeApp(config);
     </script>
     <script src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <!-- build:js scripts/main.min.js -->
     <script src="scripts/main.js"></script>
     <!-- endbuild -->
