@@ -286,3 +286,20 @@ html, body {
   justify-content: center;
   margin-top: 30px;
 }
+@media (max-width: 840px) {
+  #floor1-card-container {
+    zoom: 0.7;
+  }
+  #floor2-card-container {
+    zoom: 0.7;
+  }
+  #floor3-card-container {
+    zoom: 0.7;
+  }
+  #floor4-card-container {
+    zoom: 0.7;
+  }
+  #floor5-card-container {
+    zoom: 0.7;
+  }
+}
