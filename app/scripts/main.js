@@ -78,6 +78,7 @@ var App = (function() {
   var roomModel = [];
   var rooms = [];
   var currentActiveCard = null;
+  var tmpData = {};
   var filterMode = 'linkShowAll';
 
   var addToDataModel = function(floorNo, roomNo, details) {
@@ -85,7 +86,9 @@ var App = (function() {
       floor: floorNo,
       room: roomNo,
       price: details.price === undefined ? 0 : details.price,
-      status: details.status
+      status: details.status,
+      paymentMethod: details.paymentMethod,
+      payDate: details.payDate
     });
   };
   var clearDataModel = function() {
@@ -103,6 +106,14 @@ var App = (function() {
     tmp.body.innerHTML = str;
     return tmp.body.children;
   };
+  var copyToTempModel = function() {
+    tmpData.room = currentActiveCard.room;
+    tmpData.floor = currentActiveCard.floor;
+    tmpData.price = currentActiveCard.price;
+    tmpData.status = currentActiveCard.status;
+    tmpData.paymentMethod = currentActiveCard.paymentMethod;
+    tmpData.payDate = currentActiveCard.payDate;
+  };
   var renderRoomCardDom = function(cardId) {
     // select from data model
     var roomNo = cardId.match('-([^;]+)-')[1];
@@ -115,8 +126,11 @@ var App = (function() {
     }
     // we are certain that the result will be just one card
     currentActiveCard = filteredModel[0];
+    copyToTempModel();
     var roomPrice = filteredModel[0].price.toFixed(2);
     var roomStatus = filteredModel[0].status;
+    var roomPaymentMethod = filteredModel[0].paymentMethod;
+    var roomPayDate = filteredModel[0].payDate;
 
     var roomCardHeader = document.getElementById('room-card-header');
     var roomPriceContainer = document.getElementById('room-price-container');
@@ -129,6 +143,7 @@ var App = (function() {
     // https://stackoverflow.com/questions/35783797/set-material-design-lite-radio-button-option-with-jquery
     var paymentMethodContainer = document.querySelector('.payment-method-container');
     var datePaidContainer = document.getElementById('date-paid-container');
+
     var today = new Date();
     var todayString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     datePaidContainer.MaterialTextfield.change(todayString);
@@ -136,16 +151,36 @@ var App = (function() {
     if (roomStatus === 'unpaid') {
       var unpaidRadio = document.getElementById('option-unpaid');
       unpaidRadio.parentNode.MaterialRadio.check();
+
       paymentMethodContainer.style.display = 'none';
       datePaidContainer.style.display = 'none';
     } else if (roomStatus === 'paid') {
       var paidRadio = document.getElementById('option-paid');
       paidRadio.parentNode.MaterialRadio.check();
+
       paymentMethodContainer.style.display = 'block';
       datePaidContainer.style.display = 'block';
+      // map payment method
+      document.getElementById('scb').classList.add('grayscale');
+      document.getElementById('bbl').classList.add('grayscale');
+      document.getElementById('kbank').classList.add('grayscale');
+      document.getElementById('cash').classList.add('grayscale');
+      if (roomPaymentMethod === undefined) {
+        document.getElementById('scb').classList.add('grayscale');
+        document.getElementById('bbl').classList.add('grayscale');
+        document.getElementById('kbank').classList.add('grayscale');
+        document.getElementById('cash').classList.remove('grayscale');
+      } else {
+        document.getElementById(roomPaymentMethod).classList.remove('grayscale');
+      }
+      // map pay date
+      if (roomPayDate !== undefined) {
+        datePaidContainer.MaterialTextfield.change(roomPayDate);
+      }
     } else if (roomStatus === 'unbilled') {
       var unbilledRadio = document.getElementById('option-unbilled');
       unbilledRadio.parentNode.MaterialRadio.check();
+
       paymentMethodContainer.style.display = 'none';
       datePaidContainer.style.display = 'none';
     }
@@ -154,7 +189,6 @@ var App = (function() {
     var card = document.querySelector('#' + cardId);
     if (card !== null) {
       card.addEventListener('click', function() {
-        console.log('Clicked: ' + cardId);
         renderRoomCardDom(cardId);
         showOverlay();
       });
@@ -181,19 +215,24 @@ var App = (function() {
   };
   var renderCardDom = function(floorNumber, cardName, roomInfo) {
     var cardClassName = '.mdl-color--light-blue-900';
+    var iconClassName = 'icon mdi mdi-email mdl-color-text--light-blue-A400';
+    var priceIconName = 'icon mdi mdi-cash-usd';
     var cardId = 'room-' + cardName + '-card';
     var price = 2500;
     if (typeof roomInfo !== 'undefined') {
       price = roomInfo.price;
       switch (roomInfo.status) {
         case 'unpaid':
-          cardClassName = 'mdl-color--red-400';
+          cardClassName = 'mdl-color--red-100';
+          iconClassName = 'icon mdi mdi-email-alert mdl-color-text--red-600';
           break;
         case 'paid':
-          cardClassName = 'mdl-color--green-A400';
+          cardClassName = 'mdl-color--green-100';
+          iconClassName = 'icon mdi mdi-email-secure mdl-color-text--green-400';
           break;
         case 'unbilled':
-          cardClassName = 'mdl-color--blue-200';
+          cardClassName = 'mdl-color--light-blue-100';
+          iconClassName = 'icon mdi mdi-email mdl-color-text--light-blue-A400';
           break;
         default: break;
       }
@@ -201,12 +240,18 @@ var App = (function() {
     price = price.toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
     var cardContainer = document.querySelector('#floor' + floorNumber + '-card-container');
     var cardDom = parseHTML(
-      '<div id="' + cardId + '" class="mdl-cell mdl-cell--2-col mdl-card mdl-shadow--2dp ' + cardClassName + '">' +
-        '<div class="mdl-color-text--blue-grey-50 mdl-card__title">' +
-          '<h3>-' + cardName + '-</h3>' +
+      '<div id="' + cardId + '" class="mdl-cell mdl-cell--2-col mdl-cell--2-col-tablet mdl-cell--2-col-phone mdl-card mdl-shadow--2dp ' + cardClassName + '">' +
+        '<div class="mdl-color-text--blue-grey-900 mdl-card__title">' +
+          '<h4>-' + cardName + '-</h4>' +
         '</div>' +
-        '<div class="mdl-card__supporting-text">' +
-          '<h4>' + price + ' Baht</h4>' +
+        '<div class="mdl-card__supporting-text" style="padding-left: 5px;">' +
+          '<div class="mdl-typography--text-center">' +
+            '<i class="' + priceIconName + '"></i>' +
+            '<h4>' + price + '</h4>' +
+          '</div>' +
+        '</div>' +
+        '<div class="mdl-card__menu">' +
+          '<i class="' + iconClassName + '"></i>' +
         '</div>' +
       '</div>'
     );
@@ -243,7 +288,7 @@ var App = (function() {
         filteredFloors.push(filteredStatusModel[i].floor);
       }
     }
-    renderFloorHeaderDom(3);
+    renderFloorHeaderDom(5);
     for (i = 0; i < filteredStatusModel.length; i++) {
       var roomNumber = filteredStatusModel[i].room;
       var floorNumber = filteredStatusModel[i].floor;
@@ -258,8 +303,8 @@ var App = (function() {
     var changedValue = event.currentTarget.value;
     var paymentMethodContainer = document.querySelector('.payment-method-container');
     var datePaidContainer = document.getElementById('date-paid-container');
-    var paymentMethod = currentActiveCard.paymentMethod;
-    currentActiveCard.status = changedValue;
+    var paymentMethod = tmpData.paymentMethod;
+    tmpData.status = changedValue;
     if (changedValue === 'paid') {
       paymentMethodContainer.style.display = 'block';
       datePaidContainer.style.display = 'block';
@@ -280,38 +325,39 @@ var App = (function() {
     var paymentMethodId = event.currentTarget.id;
     document.getElementById(paymentMethodId).classList.remove('grayscale');
     if (paymentMethodId === 'scb') {
-      currentActiveCard.paymentMethod = 'scb';
+      tmpData.paymentMethod = 'scb';
       document.getElementById('bbl').classList.add('grayscale');
       document.getElementById('kbank').classList.add('grayscale');
       document.getElementById('cash').classList.add('grayscale');
     } else if (paymentMethodId === 'bbl') {
-      currentActiveCard.paymentMethod = 'bbl';
+      tmpData.paymentMethod = 'bbl';
       document.getElementById('scb').classList.add('grayscale');
       document.getElementById('kbank').classList.add('grayscale');
       document.getElementById('cash').classList.add('grayscale');
     } else if (paymentMethodId === 'kbank') {
-      currentActiveCard.paymentMethod = 'kbank';
+      tmpData.paymentMethod = 'kbank';
       document.getElementById('bbl').classList.add('grayscale');
       document.getElementById('scb').classList.add('grayscale');
       document.getElementById('cash').classList.add('grayscale');
     } else if (paymentMethodId === 'cash') {
-      currentActiveCard.paymentMethod = 'cash';
+      tmpData.paymentMethod = 'cash';
       document.getElementById('bbl').classList.add('grayscale');
       document.getElementById('kbank').classList.add('grayscale');
       document.getElementById('scb').classList.add('grayscale');
     }
   };
   var saveToFirebase = function() {
-    console.log(currentActiveCard);
-    var roomNo = currentActiveCard.room;
-    var price = currentActiveCard.price;
-    var status = currentActiveCard.status;
-    var paymentMethod = status === 'paid' ? currentActiveCard.paymentMethod : null;
+    var roomNo = tmpData.room;
+    var price = tmpData.price;
+    var status = tmpData.status;
+    var paymentMethod = status === 'paid' ? tmpData.paymentMethod : null;
+    var payDate = status === 'paid' ? tmpData.payDate : null;
     var firebaseRef = firebase.database().ref('rooms/' + roomNo);
     firebaseRef.set({
       price: price,
       status: status,
-      paymentMethod: paymentMethod
+      paymentMethod: paymentMethod,
+      payDate: payDate
     });
     closeOverlay();
   };
@@ -343,10 +389,9 @@ var App = (function() {
         }
         // Code which is listening to firebase database change
         roomsRef.on('value', function(snapshot) {
-          console.log(snapshot.val());
           var filteredStatusModel = [];
           var roomsObj = snapshot.val();
-          renderFloorHeaderDom(3);
+          renderFloorHeaderDom(5);
           clearDataModel();
           var i;
           for (i = 0; i < rooms.length; i++) {
@@ -384,17 +429,23 @@ var App = (function() {
       var unbilledElement = document.querySelector('#linkUnbilled');
 
       var overlayCloseBtn = document.querySelector('#overlay-close-btn');
+
       var optionPaidElement = document.querySelector('#option-paid');
       var optionUnpaidElement = document.querySelector('#option-unpaid');
       var optionUnbilledElement = document.querySelector('#option-unbilled');
+
       var roomPriceInput = document.querySelector('#room-price');
+      var datePaidInput = document.querySelector('#date-paid');
+
       var scbIcon = document.querySelector('#scb');
       var bblIcon = document.querySelector('#bbl');
       var kbankIcon = document.querySelector('#kbank');
       var cashIcon = document.querySelector('#cash');
+
       var saveBtn = document.querySelector('#save-btn');
       var cancelBtn = document.querySelector('#cancel-btn');
 
+      // Drawer Event
       showAllElement.addEventListener('click', function() {
         filterMode = 'linkShowAll';
         linkHandler(showAllElement);
@@ -416,14 +467,17 @@ var App = (function() {
       saveBtn.addEventListener('click', saveToFirebase);
       roomPriceInput.addEventListener('keyup', function(event) {
         if (event.keyCode === 13) {
-          roomPriceInput.blur();
+          this.blur();
         }
       });
       roomPriceInput.addEventListener('blur', function() {
-        var formattedPrice = roomPriceInput.valueAsNumber.toFixed(2);
+        var formattedPrice = this.valueAsNumber.toFixed(2);
         var roomPriceContainer = document.getElementById('room-price-container');
         roomPriceContainer.MaterialTextfield.change(formattedPrice);
-        currentActiveCard.price = roomPriceInput.valueAsNumber;
+        tmpData.price = this.valueAsNumber;
+      });
+      datePaidInput.addEventListener('blur', function() {
+        tmpData.payDate = this.value;
       });
       optionPaidElement.addEventListener('change', function(event) {
         radioHandler(event, currentActiveCard);

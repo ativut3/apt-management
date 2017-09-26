@@ -216,9 +216,9 @@ html, body {
 .mdl-card > .mdl-card__title {
   justify-content: center;
 }
-.mdl-card > .mdl-card__supporting-text {
+/*.mdl-card > .mdl-card__supporting-text {
   text-align: center;
-}
+}*/
 .mdl-card:hover {
   cursor: pointer;
 }
@@ -256,6 +256,7 @@ html, body {
 }
 .payment-method {
   display: inline-block;
+  margin-right: 5px;
 }
 .grayscale {
   -webkit-filter: grayscale(100%);
@@ -263,4 +264,19 @@ html, body {
   -ms-filter: grayscale(100%);
   -o-filter: grayscale(100%);
   opacity: 0.5;
+}
+.icon {
+  font-size: 30px;
+}
+.center-container {
+  text-align: center;
+}
+.mdl-typography--text-center > i {
+  margin-right: 10px;
+}
+.mdl-typography--text-center > h4 {
+  display: inline-block;
+}
+.mdl-radio__label {
+  margin-right: 5px;
 }
