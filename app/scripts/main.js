@@ -214,7 +214,7 @@ var App = (function() {
     }
   };
   var renderCardDom = function(floorNumber, cardName, roomInfo) {
-    var cardClassName = '.mdl-color--light-blue-900';
+    var cardClassName = 'unbilled-background';
     var iconClassName = 'icon mdi mdi-email mdl-color-text--light-blue-A400';
     var priceIconName = 'icon mdi mdi-cash-usd';
     var cardId = 'room-' + cardName + '-card';
@@ -223,15 +223,18 @@ var App = (function() {
       price = roomInfo.price;
       switch (roomInfo.status) {
         case 'unpaid':
-          cardClassName = 'mdl-color--red-100';
+          // cardClassName = 'mdl-color--red-100';
+          cardClassName = 'unpaid-background';
           iconClassName = 'icon mdi mdi-email-alert mdl-color-text--red-600';
           break;
         case 'paid':
-          cardClassName = 'mdl-color--green-100';
+          // cardClassName = 'mdl-color--green-100';
+          cardClassName = 'paid-background';
           iconClassName = 'icon mdi mdi-email-secure mdl-color-text--green-400';
           break;
         case 'unbilled':
-          cardClassName = 'mdl-color--light-blue-100';
+          // cardClassName = 'mdl-color--light-blue-100';
+          cardClassName = 'unbilled-background';
           iconClassName = 'icon mdi mdi-email mdl-color-text--light-blue-A400';
           break;
         default: break;
@@ -490,6 +493,15 @@ var App = (function() {
       });
       datePaidInput.addEventListener('blur', function() {
         tmpData.payDate = this.value;
+        if (this.value === '' || this.valueAsDate === null) {
+          var today = new Date();
+          var todayString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+          // date-paid-container
+          this.parentElement.MaterialTextfield.change(todayString);
+          tmpData.payDate = todayString;
+        } else {
+          tmpData.payDate = this.value;
+        }
       });
       optionPaidElement.addEventListener('change', function(event) {
         radioHandler(event);
