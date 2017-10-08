@@ -350,11 +350,11 @@ var App = (function() {
             if (data === 'cash') {
               return '<img src="images/cash.png" width="30" height="30">';
             } else if (data === 'scb') {
-              return '<img src="images/scb.png" width="30" height="30">';
+              return '<img src="images/SCB.png" width="30" height="30">';
             } else if (data === 'kbank') {
               return '<img src="images/kbank.png" width="30" height="30">';
             } else if (data === 'bbl') {
-              return '<img src="images/bbl.png" width="30" height="30">';
+              return '<img src="images/BBL.png" width="30" height="30">';
             }
           }
         }
