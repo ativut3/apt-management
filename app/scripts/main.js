@@ -19,6 +19,7 @@
  /* global firebase, $ */
 /* eslint-env browser */
 /* eslint max-len: [0, 150, 4] */
+/* eslint new-cap: [2, {capIsNew: false}] */
 var App = (function() {
   'use strict';
 
@@ -100,6 +101,17 @@ var App = (function() {
   };
   var closeOverlay = function() {
     document.getElementById('overlay-container').style.height = '0%';
+  };
+  var updateNavigationDrawerView = function(element) {
+    var previousActiveElement = document.querySelector('.mdl-navigation__link--current');
+    if (previousActiveElement !== null) {
+      previousActiveElement.classList.remove('mdl-navigation__link--current');
+    }
+    element.classList.add('mdl-navigation__link--current');
+  };
+  var closeDrawer = function() {
+    var drawer = document.querySelector('.mdl-layout');
+    drawer.MaterialLayout.toggleDrawer();
   };
   var parseHTML = function(str) {
     var tmp = document.implementation.createHTMLDocument();
@@ -262,11 +274,7 @@ var App = (function() {
     addCardOnClickEventListener(cardId);
   };
   var linkHandler = function(element) {
-    var previousActiveElement = document.querySelector('.mdl-navigation__link--current');
-    if (previousActiveElement !== null) {
-      previousActiveElement.classList.remove('mdl-navigation__link--current');
-    }
-    element.classList.add('mdl-navigation__link--current');
+    updateNavigationDrawerView(element);
     var filterId = element.id;
     var filteredStatusModel = [];
     var filteredFloors = [];
@@ -299,8 +307,64 @@ var App = (function() {
     }
 
     // after click, close drawer
-    var drawer = document.querySelector('.mdl-layout');
-    drawer.MaterialLayout.toggleDrawer();
+    closeDrawer();
+  };
+  var renderLedgerTable = function() {
+    var filteredStatusModel = [];
+    var rootContainer = document.querySelector('.mdl-layout__content');
+    rootContainer.innerHTML = '';
+    var tableDom = parseHTML(
+      '<div id="ledger-table-container">' +
+        '<table id="ledgerTable" class="mdl-data-table" cellspacing="0" width="100%">' +
+        '</table>' +
+      '</div>'
+    );
+    rootContainer.appendChild(tableDom[0]);
+
+    filteredStatusModel = roomModel.filter(function(obj) {
+      return obj.status === 'paid';
+    });
+
+    $('#ledgerTable').DataTable({
+      data: filteredStatusModel,
+      columns: [
+        {
+          title: 'Room',
+          data: 'room'
+        },
+        {
+          title: 'Price (Baht)',
+          data: 'price',
+          render: $.fn.dataTable.render.number(',', '.', 2)
+        },
+        {
+          title: 'Pay Date',
+          data: 'payDate',
+          render: $.fn.dataTable.render.moment('ll')
+        },
+        {
+          title: 'Pay Method',
+          data: 'paymentMethod',
+          orderable: false,
+          render: function(data) {
+            if (data === 'cash') {
+              return '<img src="images/cash.png" width="30" height="30">';
+            } else if (data === 'scb') {
+              return '<img src="images/scb.png" width="30" height="30">';
+            } else if (data === 'kbank') {
+              return '<img src="images/kbank.png" width="30" height="30">';
+            } else if (data === 'bbl') {
+              return '<img src="images/bbl.png" width="30" height="30">';
+            }
+          }
+        }
+      ]
+    });
+  };
+  var switchToLedgerView = function(element) {
+    updateNavigationDrawerView(element);
+    renderLedgerTable();
+    closeDrawer();
   };
   var radioHandler = function(event) {
     var changedValue = event.currentTarget.value;
@@ -437,6 +501,7 @@ var App = (function() {
       var paidElement = document.querySelector('#linkPaid');
       var unpaidElement = document.querySelector('#linkUnpaid');
       var unbilledElement = document.querySelector('#linkUnbilled');
+      var ledgerElement = document.querySelector('#linkLedger');
 
       var overlayCloseBtn = document.querySelector('#overlay-close-btn');
 
@@ -458,19 +523,22 @@ var App = (function() {
       // Drawer Event
       showAllElement.addEventListener('click', function() {
         filterMode = 'linkShowAll';
-        linkHandler(showAllElement);
+        linkHandler(this);
       });
       paidElement.addEventListener('click', function() {
         filterMode = 'linkPaid';
-        linkHandler(paidElement);
+        linkHandler(this);
       });
       unpaidElement.addEventListener('click', function() {
         filterMode = 'linkUnpaid';
-        linkHandler(unpaidElement);
+        linkHandler(this);
       });
       unbilledElement.addEventListener('click', function() {
         filterMode = 'linkUnbilled';
-        linkHandler(unbilledElement);
+        linkHandler(this);
+      });
+      ledgerElement.addEventListener('click', function() {
+        switchToLedgerView(this);
       });
       overlayCloseBtn.addEventListener('click', closeOverlay);
       cancelBtn.addEventListener('click', closeOverlay);
