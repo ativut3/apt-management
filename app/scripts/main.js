@@ -309,10 +309,27 @@ var App = (function() {
     // after click, close drawer
     closeDrawer();
   };
+  var renderExportToExcelButton = function() {
+    var rootContainer = document.querySelector('.mdl-layout__content');
+    rootContainer.innerHTML = '';
+    var exportDom = parseHTML(
+      '<div id="export-to-excel-container" class="mdl-grid">' +
+        '<div class="mdl-cell mdl-cell--12-col">' +
+          '<button id="export-to-excel-btn" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect right">' +
+            '<i class="icon mdi mdi-file-excel"></i>' +
+          '</button>' +
+          '<div class="mdl-tooltip" data-mdl-for="export-to-excel-btn">' +
+            'Export to Excel' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+    rootContainer.appendChild(exportDom[0]);
+    componentHandler.upgradeElements(rootContainer);
+  };
   var renderLedgerTable = function() {
     var filteredStatusModel = [];
     var rootContainer = document.querySelector('.mdl-layout__content');
-    rootContainer.innerHTML = '';
     var tableDom = parseHTML(
       '<div id="ledger-table-container">' +
         '<table id="ledgerTable" class="mdl-data-table" cellspacing="0" width="100%">' +
@@ -345,6 +362,22 @@ var App = (function() {
         {
           title: 'Pay Method',
           data: 'paymentMethod',
+          render: function(data) {
+            if (data === 'cash') {
+              return 'Cash';
+            } else if (data === 'scb') {
+              return 'SCB';
+            } else if (data === 'kbank') {
+              return 'KBANK';
+            } else if (data === 'bbl') {
+              return 'BBL';
+            }
+          }
+        },
+        {
+          title: '',
+          width: '5vw',
+          data: 'paymentMethod',
           orderable: false,
           render: function(data) {
             if (data === 'cash') {
@@ -363,6 +396,7 @@ var App = (function() {
   };
   var switchToLedgerView = function(element) {
     updateNavigationDrawerView(element);
+    renderExportToExcelButton();
     renderLedgerTable();
     closeDrawer();
   };
