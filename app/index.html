@@ -99,6 +99,10 @@
                   <input class="mdl-textfield__input" type="date" id="date-paid">
                   <label class="mdl-textfield__label" for="date-paid">Pay Date</label>
                 </div>
+                <div id="notes-container" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                  <textarea class="mdl-textfield__input" type="text" rows= "2" id="notes-input"></textarea>
+                  <label class="mdl-textfield__label" for="notes-input">Notes</label>
+                </div>
             </div>
             <div class="mdl-card__actions mdl-card--border">
               <button id="save-btn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Save</button>
@@ -113,6 +117,15 @@
             <img src="images/logo.png" width="70" height="70">
             RB Place
           </span>
+          <div class="mdl-layout-spacer"></div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right">
+            <label class="mdl-button mdl-js-button mdl-button--icon" for="month-header-input">
+              <i class="icon mdi mdi-calendar"></i>
+            </label>
+            <div class="mdl-textfield__expandable-holder">
+              <input class="mdl-textfield__input" type="text" id="month-header-input">
+            </div>
+          </div>
         </div>
       </header>
       <div class="mdl-layout__drawer">

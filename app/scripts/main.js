@@ -16,7 +16,7 @@
  *  limitations under the License
  *
  */
- /* global firebase, $ */
+ /* global firebase, $, componentHandler */
 /* eslint-env browser */
 /* eslint max-len: [0, 150, 4] */
 /* eslint new-cap: [2, {capIsNew: false}] */
@@ -89,7 +89,8 @@ var App = (function() {
       price: details.price === undefined ? 0 : details.price,
       status: details.status,
       paymentMethod: details.paymentMethod,
-      payDate: details.payDate
+      payDate: details.payDate,
+      notes: details.notes
     });
   };
   var clearDataModel = function() {
@@ -125,6 +126,7 @@ var App = (function() {
     tmpData.status = currentActiveCard.status;
     tmpData.paymentMethod = currentActiveCard.paymentMethod;
     tmpData.payDate = currentActiveCard.payDate;
+    tmpData.notes = currentActiveCard.notes;
   };
   var renderRoomCardDom = function(cardId) {
     // select from data model
@@ -143,6 +145,7 @@ var App = (function() {
     var roomStatus = filteredModel[0].status;
     var roomPaymentMethod = filteredModel[0].paymentMethod;
     var roomPayDate = filteredModel[0].payDate;
+    var roomNotes = filteredModel[0].notes;
 
     var roomCardHeader = document.getElementById('room-card-header');
     var roomPriceContainer = document.getElementById('room-price-container');
@@ -155,10 +158,12 @@ var App = (function() {
     // https://stackoverflow.com/questions/35783797/set-material-design-lite-radio-button-option-with-jquery
     var paymentMethodContainer = document.querySelector('.payment-method-container');
     var datePaidContainer = document.getElementById('date-paid-container');
+    var notesContainer = document.getElementById('notes-container');
 
     var today = new Date();
     var todayString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     datePaidContainer.MaterialTextfield.change(todayString);
+    notesContainer.MaterialTextfield.change(roomNotes);
 
     if (roomStatus === 'unpaid') {
       var unpaidRadio = document.getElementById('option-unpaid');
@@ -460,12 +465,14 @@ var App = (function() {
     var status = tmpData.status;
     var paymentMethod = status === 'paid' ? tmpData.paymentMethod : null;
     var payDate = status === 'paid' ? tmpData.payDate : null;
+    var notes = tmpData.notes;
     var firebaseRef = firebase.database().ref('rooms/' + roomNo);
     firebaseRef.set({
       price: price,
       status: status,
       paymentMethod: paymentMethod,
-      payDate: payDate
+      payDate: payDate,
+      notes: notes
     });
     closeOverlay();
   };
@@ -545,6 +552,7 @@ var App = (function() {
 
       var roomPriceInput = document.querySelector('#room-price');
       var datePaidInput = document.querySelector('#date-paid');
+      var notesInput = document.querySelector('#notes-input');
 
       var scbIcon = document.querySelector('#scb');
       var bblIcon = document.querySelector('#bbl');
@@ -604,6 +612,9 @@ var App = (function() {
         } else {
           tmpData.payDate = this.value;
         }
+      });
+      notesInput.addEventListener('blur', function() {
+        tmpData.notes = this.value;
       });
       optionPaidElement.addEventListener('change', function(event) {
         radioHandler(event);
