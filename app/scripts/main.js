@@ -476,18 +476,30 @@ var App = (function() {
     });
     closeOverlay();
   };
+  var saveMonthToFirebase = function(val) {
+    var firebaseRef = firebase.database().ref('month');
+    firebaseRef.set(val);
+  };
   return {
     initDatabase: function() {
       var firebaseRef = firebase.database().ref();
       var roomsRef = firebaseRef.child('rooms');
       var floorsRef = firebaseRef.child('floors');
+      var monthRef = firebase.database().ref('month');
 
       Promise.all([
         roomsRef.once('value'),
-        floorsRef.once('value')
+        floorsRef.once('value'),
+        monthRef.once('value')
       ]).then(function(snapshots) {
         var roomsObj = snapshots[0].val();
         var floorsObj = snapshots[1].val();
+        var monthValue = snapshots[2].val();
+
+        if (monthValue !== null) {
+          var monthContainer = document.getElementById('month-input-container');
+          monthContainer.MaterialTextfield.change(monthValue);
+        }
         var numFloors = Object.keys(floorsObj).length;
 
         renderFloorHeaderDom(numFloors);
@@ -535,6 +547,11 @@ var App = (function() {
             renderCardDom(floorNumber, roomNumber, filteredStatusModel[i]);
           }
         });
+        monthRef.on('value', function(snapshot) {
+          var monthValue = snapshot.val();
+          var monthContainer = document.getElementById('month-input-container');
+          monthContainer.MaterialTextfield.change(monthValue);
+        });
       });
     },
     registerDomEvent: function() {
@@ -553,6 +570,7 @@ var App = (function() {
       var roomPriceInput = document.querySelector('#room-price');
       var datePaidInput = document.querySelector('#date-paid');
       var notesInput = document.querySelector('#notes-input');
+      var monthHeaderInput = document.querySelector('#month-header-input');
 
       var scbIcon = document.querySelector('#scb');
       var bblIcon = document.querySelector('#bbl');
@@ -585,6 +603,14 @@ var App = (function() {
       overlayCloseBtn.addEventListener('click', closeOverlay);
       cancelBtn.addEventListener('click', closeOverlay);
       saveBtn.addEventListener('click', saveToFirebase);
+      monthHeaderInput.addEventListener('keyup', function(event) {
+        if (event.keyCode === 13) {
+          this.blur();
+        }
+      });
+      monthHeaderInput.addEventListener('blur', function() {
+        saveMonthToFirebase(this.value);
+      });
       roomPriceInput.addEventListener('keyup', function(event) {
         if (event.keyCode === 13) {
           this.blur();
