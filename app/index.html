@@ -57,6 +57,25 @@
   </head>
   <body>
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <div id="confirmation-container" class="overlay">
+        <div class="overlay-content">
+          <div class="mdl-card mdl-shadow--6dp">
+            <div class="mdl-card__title mdl-color--primary mdl-color-text--white">
+              <h2 id="room-card-header" class="mdl-card__title-text">Are you sure?</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <div id="confirmation-text-container">
+                <span>This action will set </span><span class="bold red-text">'Unpaid'</span><span> and clear </span><span class="bold">'Notes'</span><span> to all of the rooms and cannot be undone.</span><br><br>
+                <span>Please click </span><span class="bold">'Yes'</span><span> to proceed.</span>
+              </div>
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <button id="yes-reset-btn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Yes</button>
+              <button id="cancel-reset-btn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div id="overlay-container" class="overlay">
         <a id="overlay-close-btn" href="#" class="closebtn">&times;</a>
         <div class="overlay-content">
@@ -126,6 +145,14 @@
               <input class="mdl-textfield__input" type="text" id="month-header-input">
             </div>
           </div>
+          <button id="header-menu-button" class="mdl-button mdl-js-button mdl-button--icon">
+            <i class="material-icons">more_vert</i>
+          </button>
+          <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="header-menu-button">
+            <li id="import-excel-entry" class="mdl-menu__item">Import data from Excel...</li>
+            <li id="download-excel-template-entry" class="mdl-menu__item">Download Excel template file...</li>
+          </ul>
+          <input id="excel-input" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display: none;">
         </div>
       </header>
       <div class="mdl-layout__drawer">
@@ -136,6 +163,7 @@
           <a id="linkUnpaid" class="mdl-navigation__link" href="#">Unpaid</a>
           <a id="linkUnbilled" class="mdl-navigation__link" href="#">Unbilled</a>
           <div class="mdl-layout-spacer"></div>
+          <a id="linkReset" class="mdl-navigation__link" href="#">Reset</a>
           <a id="linkLedger" class="mdl-navigation__link" href="#">Ledger (Beta)</a>
         </nav>
       </div>

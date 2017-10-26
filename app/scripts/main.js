@@ -16,7 +16,7 @@
  *  limitations under the License
  *
  */
- /* global firebase, $, componentHandler */
+ /* global firebase, $, componentHandler, XLSX */
 /* eslint-env browser */
 /* eslint max-len: [0, 150, 4] */
 /* eslint new-cap: [2, {capIsNew: false}] */
@@ -314,6 +314,18 @@ var App = (function() {
     // after click, close drawer
     closeDrawer();
   };
+  var showResetConfirmationDialog = function() {
+    document.getElementById('confirmation-container').style.height = '100%';
+    document.getElementById('confirmation-container').style.zIndex = '10';
+  };
+  var closeResetConfirmationDialog = function() {
+    document.getElementById('confirmation-container').style.height = '0%';
+  };
+  var resetToUnpaid = function() {
+    closeDrawer();
+    // show confirmation dialog before proceed
+    showResetConfirmationDialog();
+  };
   var renderExportToExcelButton = function() {
     var rootContainer = document.querySelector('.mdl-layout__content');
     rootContainer.innerHTML = '';
@@ -459,6 +471,47 @@ var App = (function() {
       document.getElementById('scb').classList.add('grayscale');
     }
   };
+  var updateFromExcelToFirebase = function(roomNo, price, notes) {
+    if (roomNo !== null) {
+      var firebaseRef = firebase.database().ref('rooms/' + roomNo);
+      // update both price and notes
+      if (price !== null && notes !== null) {
+        if (price === 0) {
+          firebaseRef.update({
+            price: price,
+            status: 'unbilled',
+            paymentMethod: null,
+            payDate: null,
+            notes: notes
+          });
+        } else {
+          firebaseRef.update({
+            price: price,
+            notes: notes
+          });
+        }
+      // update only notes
+      } else if (notes !== null) {
+        firebaseRef.update({
+          notes: notes
+        });
+      // update only price
+      } else if (price !== null) {
+        if (price === 0) {
+          firebaseRef.update({
+            price: price,
+            status: 'unbilled',
+            paymentMethod: null,
+            payDate: null
+          });
+        } else {
+          firebaseRef.update({
+            price: price
+          });
+        }
+      }
+    }
+  };
   var saveToFirebase = function() {
     var roomNo = tmpData.room;
     var price = tmpData.price;
@@ -479,6 +532,20 @@ var App = (function() {
   var saveMonthToFirebase = function(val) {
     var firebaseRef = firebase.database().ref('month');
     firebaseRef.set(val);
+  };
+  var resetToFirebase = function() {
+    var tmpRoomModel = JSON.parse(JSON.stringify(roomModel));
+    tmpRoomModel.forEach(function(obj) {
+      var roomNo = obj.room;
+      var firebaseRef = firebase.database().ref('rooms/' + roomNo);
+      firebaseRef.update({
+        status: 'unpaid',
+        paymentMethod: null,
+        payDate: null,
+        notes: null
+      });
+    });
+    closeResetConfirmationDialog();
   };
   return {
     initDatabase: function() {
@@ -559,6 +626,7 @@ var App = (function() {
       var paidElement = document.querySelector('#linkPaid');
       var unpaidElement = document.querySelector('#linkUnpaid');
       var unbilledElement = document.querySelector('#linkUnbilled');
+      var resetElement = document.querySelector('#linkReset');
       var ledgerElement = document.querySelector('#linkLedger');
 
       var overlayCloseBtn = document.querySelector('#overlay-close-btn');
@@ -570,7 +638,10 @@ var App = (function() {
       var roomPriceInput = document.querySelector('#room-price');
       var datePaidInput = document.querySelector('#date-paid');
       var notesInput = document.querySelector('#notes-input');
+
       var monthHeaderInput = document.querySelector('#month-header-input');
+      var importExcelEntry = document.querySelector('#import-excel-entry');
+      var excelFileInput = document.querySelector('#excel-input');
 
       var scbIcon = document.querySelector('#scb');
       var bblIcon = document.querySelector('#bbl');
@@ -579,6 +650,10 @@ var App = (function() {
 
       var saveBtn = document.querySelector('#save-btn');
       var cancelBtn = document.querySelector('#cancel-btn');
+
+      // Reset confirmation dialog
+      var yesResetBtn = document.querySelector('#yes-reset-btn');
+      var cancelResetBtn = document.querySelector('#cancel-reset-btn');
 
       // Drawer Event
       showAllElement.addEventListener('click', function() {
@@ -597,12 +672,17 @@ var App = (function() {
         filterMode = 'linkUnbilled';
         linkHandler(this);
       });
+      resetElement.addEventListener('click', function() {
+        resetToUnpaid();
+      });
       ledgerElement.addEventListener('click', function() {
         switchToLedgerView(this);
       });
       overlayCloseBtn.addEventListener('click', closeOverlay);
       cancelBtn.addEventListener('click', closeOverlay);
       saveBtn.addEventListener('click', saveToFirebase);
+      yesResetBtn.addEventListener('click', resetToFirebase);
+      cancelResetBtn.addEventListener('click', closeResetConfirmationDialog);
       monthHeaderInput.addEventListener('keyup', function(event) {
         if (event.keyCode === 13) {
           this.blur();
@@ -610,6 +690,41 @@ var App = (function() {
       });
       monthHeaderInput.addEventListener('blur', function() {
         saveMonthToFirebase(this.value);
+      });
+      importExcelEntry.addEventListener('click', function() {
+        excelFileInput.click();
+      });
+      excelFileInput.addEventListener('change', function(event) {
+        var files = event.target.files;
+        var file = files[0];
+
+        if (files && file) {
+          var fileReader = new FileReader();
+
+          fileReader.onload = function(event) {
+            var data = event.target.result;
+            var workbook = XLSX.read(data, {type: 'binary'});
+            // read from the first worksheet only
+            var sheetName = workbook.SheetNames[0];
+            var worksheet = workbook.Sheets[sheetName];
+            var jsonSheet = XLSX.utils.sheet_to_json(worksheet, {raw: true});
+            // we get the array of info
+            jsonSheet.forEach(function(obj) {
+              var roomNo = obj.Room ? obj.Room : null;
+              var price = obj.Price ? obj.Price : null;
+              var notes = obj.Notes ? obj.Notes : null;
+
+              updateFromExcelToFirebase(roomNo, price, notes);
+            });
+          };
+
+          if (fileReader.readAsBinaryString) {
+            fileReader.readAsBinaryString(file);
+          } else {
+            fileReader.readAsArrayBuffer(file);
+          }
+          this.value = '';
+        }
       });
       roomPriceInput.addEventListener('keyup', function(event) {
         if (event.keyCode === 13) {

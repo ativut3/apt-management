@@ -52,6 +52,12 @@ html, body {
   width: 100%;
   text-align: center;
 }
+.bold {
+  font-weight: bold;
+}
+.red-text {
+  color: red;
+}
 .overlay-content .mdl-card {
   margin: auto;
 }
