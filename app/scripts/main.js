@@ -189,7 +189,7 @@ var App = (function() {
     roomModifiedByContainer.innerHTML = '';
     var roomModifiedDom = parseHTML(
       '<span class="modified-text">Last modified by: ' + roomModifiedBy + '</span><br>' +
-      '<span class="modified-text">' + '@' + roomModifiedAt + '</span>'
+      '<span class="modified-text">@' + roomModifiedAt + '</span>'
     );
     while (roomModifiedDom.length > 0) {
       roomModifiedByContainer.appendChild(roomModifiedDom[0]);
@@ -847,7 +847,7 @@ var App = (function() {
     });
   };
   return {
-    /*initDatabase: function() {
+    /* initDatabase: function() {
       var firebaseRef = firebase.database().ref();
       var roomsRef = firebaseRef.child('rooms');
       var floorsRef = firebaseRef.child('floors');
@@ -1103,7 +1103,7 @@ var App = (function() {
         }
       });
 
-      /*// otherwise show login popup
+      /* // otherwise show login popup
       if (firebase.auth().currentUser === null) {
         showLoginOverlay();
       // if sign in already, check the permission of that user
@@ -1118,7 +1118,7 @@ var App = (function() {
 
 $(document).ready(function() {
   App.handleLoginProcess();
-  //App.initDatabase();
-  //App.registerDomEvent();
+  // App.initDatabase();
+  // App.registerDomEvent();
 });
 
