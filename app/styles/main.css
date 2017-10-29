@@ -139,6 +139,9 @@ html, body {
   .mdl-layout__content {
     overflow-x: auto;
   }
+  #month-input-container {
+    zoom: 0.8;
+  }
   #floor1-card-container {
     zoom: 0.7;
   }
@@ -156,8 +159,5 @@ html, body {
   }
   #ledger-table-container {
     zoom: 0.7;
-  }
-  #header-menu-button {
-    display: none;
   }
 }
