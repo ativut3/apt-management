@@ -76,11 +76,19 @@ var App = (function() {
   }
 
   // Your custom JavaScript goes here
+  var provider = new firebase.auth.GoogleAuthProvider();
+  var userDisplayName = null;
+  var userEmail = null;
+
   var roomModel = [];
   var rooms = [];
   var currentActiveCard = null;
   var tmpData = {};
   var filterMode = 'linkShowAll';
+
+  var getNowString = function() {
+    return new Date().toLocaleString();
+  };
 
   var addToDataModel = function(floorNo, roomNo, details) {
     roomModel.push({
@@ -90,11 +98,20 @@ var App = (function() {
       status: details.status,
       paymentMethod: details.paymentMethod,
       payDate: details.payDate,
-      notes: details.notes
+      notes: details.notes,
+      lastModifiedBy: details.lastModifiedBy,
+      lastModifiedAt: details.lastModifiedAt
     });
   };
   var clearDataModel = function() {
     roomModel.length = 0;
+  };
+  var showLoginOverlay = function() {
+    document.getElementById('login-container').style.height = '100%';
+    document.getElementById('login-container').style.zIndex = '10';
+  };
+  var closeLoginOverlay = function() {
+    document.getElementById('login-container').style.height = '0%';
   };
   var showOverlay = function() {
     document.getElementById('overlay-container').style.height = '100%';
@@ -146,9 +163,12 @@ var App = (function() {
     var roomPaymentMethod = filteredModel[0].paymentMethod;
     var roomPayDate = filteredModel[0].payDate;
     var roomNotes = filteredModel[0].notes;
+    var roomModifiedBy = filteredModel[0].lastModifiedBy === undefined ? '-' : filteredModel[0].lastModifiedBy;
+    var roomModifiedAt = filteredModel[0].lastModifiedAt === undefined ? '-' : filteredModel[0].lastModifiedAt;
 
     var roomCardHeader = document.getElementById('room-card-header');
     var roomPriceContainer = document.getElementById('room-price-container');
+    var roomModifiedByContainer = document.getElementById('modified-by-container');
     roomCardHeader.innerHTML = 'Room ' + roomNo;
 
     // fill in the price
@@ -164,6 +184,16 @@ var App = (function() {
     var todayString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
     datePaidContainer.MaterialTextfield.change(todayString);
     notesContainer.MaterialTextfield.change(roomNotes);
+
+    // fill in last modified info
+    roomModifiedByContainer.innerHTML = '';
+    var roomModifiedDom = parseHTML(
+      '<span class="modified-text">Last modified by: ' + roomModifiedBy + '</span><br>' +
+      '<span class="modified-text">' + '@' + roomModifiedAt + '</span>'
+    );
+    while (roomModifiedDom.length > 0) {
+      roomModifiedByContainer.appendChild(roomModifiedDom[0]);
+    }
 
     if (roomStatus === 'unpaid') {
       var unpaidRadio = document.getElementById('option-unpaid');
@@ -472,6 +502,7 @@ var App = (function() {
     }
   };
   var updateFromExcelToFirebase = function(roomNo, price, notes) {
+    var now = getNowString();
     if (roomNo !== null) {
       var firebaseRef = firebase.database().ref('rooms/' + roomNo);
       // update both price and notes
@@ -482,18 +513,24 @@ var App = (function() {
             status: 'unbilled',
             paymentMethod: null,
             payDate: null,
-            notes: notes
+            notes: notes,
+            lastModifiedBy: userDisplayName,
+            lastModifiedAt: now
           });
         } else {
           firebaseRef.update({
             price: price,
-            notes: notes
+            notes: notes,
+            lastModifiedBy: userDisplayName,
+            lastModifiedAt: now
           });
         }
       // update only notes
       } else if (notes !== null) {
         firebaseRef.update({
-          notes: notes
+          notes: notes,
+          lastModifiedBy: userDisplayName,
+          lastModifiedAt: now
         });
       // update only price
       } else if (price !== null) {
@@ -502,11 +539,15 @@ var App = (function() {
             price: price,
             status: 'unbilled',
             paymentMethod: null,
-            payDate: null
+            payDate: null,
+            lastModifiedBy: userDisplayName,
+            lastModifiedAt: now
           });
         } else {
           firebaseRef.update({
-            price: price
+            price: price,
+            lastModifiedBy: userDisplayName,
+            lastModifiedAt: now
           });
         }
       }
@@ -519,13 +560,16 @@ var App = (function() {
     var paymentMethod = status === 'paid' ? tmpData.paymentMethod : null;
     var payDate = status === 'paid' ? tmpData.payDate : null;
     var notes = tmpData.notes;
+    var now = getNowString();
     var firebaseRef = firebase.database().ref('rooms/' + roomNo);
     firebaseRef.set({
       price: price,
       status: status,
       paymentMethod: paymentMethod,
       payDate: payDate,
-      notes: notes
+      notes: notes,
+      lastModifiedBy: userDisplayName,
+      lastModifiedAt: now
     });
     closeOverlay();
   };
@@ -534,6 +578,7 @@ var App = (function() {
     firebaseRef.set(val);
   };
   var resetToFirebase = function() {
+    var now = getNowString();
     var tmpRoomModel = JSON.parse(JSON.stringify(roomModel));
     tmpRoomModel.forEach(function(obj) {
       var roomNo = obj.room;
@@ -542,13 +587,267 @@ var App = (function() {
         status: 'unpaid',
         paymentMethod: null,
         payDate: null,
-        notes: null
+        notes: null,
+        lastModifiedBy: userDisplayName,
+        lastModifiedAt: now
       });
     });
     closeResetConfirmationDialog();
   };
+  var showPermissionDeniedDialog = function() {
+    document.getElementById('permission-denied-container').style.height = '100%';
+    document.getElementById('permission-denied-container').style.zIndex = '10';
+  };
+  var closePermissionDeniedDialog = function() {
+    document.getElementById('permission-denied-container').style.height = '0%';
+  };
+  var initDatabase = function() {
+    var firebaseRef = firebase.database().ref();
+    var roomsRef = firebaseRef.child('rooms');
+    var floorsRef = firebaseRef.child('floors');
+    var monthRef = firebase.database().ref('month');
+
+    Promise.all([
+      roomsRef.once('value'),
+      floorsRef.once('value'),
+      monthRef.once('value')
+    ]).then(function(snapshots) {
+      var roomsObj = snapshots[0].val();
+      var floorsObj = snapshots[1].val();
+      var monthValue = snapshots[2].val();
+
+      if (monthValue !== null) {
+        var monthContainer = document.getElementById('month-input-container');
+        monthContainer.MaterialTextfield.change(monthValue);
+      }
+      var numFloors = Object.keys(floorsObj).length;
+
+      renderFloorHeaderDom(numFloors);
+      clearDataModel();
+      for (var i = 0; i < numFloors; i++) {
+        var floorDataObj = floorsObj['floor' + (i + 1)];
+        for (var prop in floorDataObj) {
+          if (floorDataObj.hasOwnProperty(prop)) {
+            rooms.push(prop);
+            addToDataModel(i + 1, prop, roomsObj[prop]);
+            renderCardDom(i + 1, prop, roomsObj[prop]);
+          }
+        }
+      }
+      // Code which is listening to firebase database change
+      roomsRef.on('value', function(snapshot) {
+        var filteredStatusModel = [];
+        var roomsObj = snapshot.val();
+        renderFloorHeaderDom(5);
+        clearDataModel();
+        var i;
+        for (i = 0; i < rooms.length; i++) {
+          var floorNo = parseInt(rooms[i].charAt(0), 10);
+          addToDataModel(floorNo, rooms[i], roomsObj[rooms[i]]);
+        }
+        // filter based on selection
+        if (filterMode === 'linkPaid') {
+          filteredStatusModel = roomModel.filter(function(obj) {
+            return obj.status === 'paid';
+          });
+        } else if (filterMode === 'linkShowAll') {
+          filteredStatusModel = roomModel;
+        } else if (filterMode === 'linkUnpaid') {
+          filteredStatusModel = roomModel.filter(function(obj) {
+            return obj.status === 'unpaid';
+          });
+        } else if (filterMode === 'linkUnbilled') {
+          filteredStatusModel = roomModel.filter(function(obj) {
+            return obj.status === 'unbilled';
+          });
+        }
+        for (i = 0; i < filteredStatusModel.length; i++) {
+          var roomNumber = filteredStatusModel[i].room;
+          var floorNumber = filteredStatusModel[i].floor;
+          renderCardDom(floorNumber, roomNumber, filteredStatusModel[i]);
+        }
+      });
+      monthRef.on('value', function(snapshot) {
+        var monthValue = snapshot.val();
+        var monthContainer = document.getElementById('month-input-container');
+        monthContainer.MaterialTextfield.change(monthValue);
+      });
+    });
+  };
+  var registerDomEvent = function() {
+    var showAllElement = document.querySelector('#linkShowAll');
+    var paidElement = document.querySelector('#linkPaid');
+    var unpaidElement = document.querySelector('#linkUnpaid');
+    var unbilledElement = document.querySelector('#linkUnbilled');
+    var resetElement = document.querySelector('#linkReset');
+    var ledgerElement = document.querySelector('#linkLedger');
+
+    var overlayCloseBtn = document.querySelector('#overlay-close-btn');
+
+    var optionPaidElement = document.querySelector('#option-paid');
+    var optionUnpaidElement = document.querySelector('#option-unpaid');
+    var optionUnbilledElement = document.querySelector('#option-unbilled');
+
+    var roomPriceInput = document.querySelector('#room-price');
+    var datePaidInput = document.querySelector('#date-paid');
+    var notesInput = document.querySelector('#notes-input');
+
+    var monthHeaderInput = document.querySelector('#month-header-input');
+    var importExcelEntry = document.querySelector('#import-excel-entry');
+    var excelFileInput = document.querySelector('#excel-input');
+
+    var scbIcon = document.querySelector('#scb');
+    var bblIcon = document.querySelector('#bbl');
+    var kbankIcon = document.querySelector('#kbank');
+    var cashIcon = document.querySelector('#cash');
+
+    var saveBtn = document.querySelector('#save-btn');
+    var cancelBtn = document.querySelector('#cancel-btn');
+
+    // Reset confirmation dialog
+    var yesResetBtn = document.querySelector('#yes-reset-btn');
+    var cancelResetBtn = document.querySelector('#cancel-reset-btn');
+
+    // Drawer Event
+    showAllElement.addEventListener('click', function() {
+      filterMode = 'linkShowAll';
+      linkHandler(this);
+    });
+    paidElement.addEventListener('click', function() {
+      filterMode = 'linkPaid';
+      linkHandler(this);
+    });
+    unpaidElement.addEventListener('click', function() {
+      filterMode = 'linkUnpaid';
+      linkHandler(this);
+    });
+    unbilledElement.addEventListener('click', function() {
+      filterMode = 'linkUnbilled';
+      linkHandler(this);
+    });
+    resetElement.addEventListener('click', function() {
+      resetToUnpaid();
+    });
+    ledgerElement.addEventListener('click', function() {
+      switchToLedgerView(this);
+    });
+    overlayCloseBtn.addEventListener('click', closeOverlay);
+    cancelBtn.addEventListener('click', closeOverlay);
+    saveBtn.addEventListener('click', saveToFirebase);
+    yesResetBtn.addEventListener('click', resetToFirebase);
+    cancelResetBtn.addEventListener('click', closeResetConfirmationDialog);
+    monthHeaderInput.addEventListener('keyup', function(event) {
+      if (event.keyCode === 13) {
+        this.blur();
+      }
+    });
+    monthHeaderInput.addEventListener('blur', function() {
+      saveMonthToFirebase(this.value);
+    });
+    importExcelEntry.addEventListener('click', function() {
+      excelFileInput.click();
+    });
+    excelFileInput.addEventListener('change', function(event) {
+      var files = event.target.files;
+      var file = files[0];
+
+      if (files && file) {
+        var fileReader = new FileReader();
+
+        fileReader.onload = function(event) {
+          var data = event.target.result;
+          var workbook = XLSX.read(data, {type: 'binary'});
+          // read from the first worksheet only
+          var sheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[sheetName];
+          var jsonSheet = XLSX.utils.sheet_to_json(worksheet, {raw: true});
+          // we get the array of info
+          jsonSheet.forEach(function(obj) {
+            var roomNo = obj.Room ? obj.Room : null;
+            var price = obj.Price ? obj.Price : null;
+            var notes = obj.Notes ? obj.Notes : null;
+
+            updateFromExcelToFirebase(roomNo, price, notes);
+          });
+        };
+
+        if (fileReader.readAsBinaryString) {
+          fileReader.readAsBinaryString(file);
+        } else {
+          fileReader.readAsArrayBuffer(file);
+        }
+        this.value = '';
+      }
+    });
+    roomPriceInput.addEventListener('keyup', function(event) {
+      if (event.keyCode === 13) {
+        this.blur();
+      }
+    });
+    roomPriceInput.addEventListener('blur', function() {
+      var roomPriceContainer = document.getElementById('room-price-container');
+      if (isNaN(this.valueAsNumber) || this.validity.valid === false) {
+        roomPriceContainer.MaterialTextfield.change('0.00');
+        tmpData.price = 0;
+      } else {
+        var formattedPrice = this.valueAsNumber.toFixed(2);
+        roomPriceContainer.MaterialTextfield.change(formattedPrice);
+        tmpData.price = this.valueAsNumber;
+      }
+    });
+    datePaidInput.addEventListener('blur', function() {
+      tmpData.payDate = this.value;
+      if (this.value === '' || this.valueAsDate === null) {
+        var today = new Date();
+        var todayString = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2);
+        // date-paid-container
+        this.parentElement.MaterialTextfield.change(todayString);
+        tmpData.payDate = todayString;
+      } else {
+        tmpData.payDate = this.value;
+      }
+    });
+    notesInput.addEventListener('blur', function() {
+      tmpData.notes = this.value;
+    });
+    optionPaidElement.addEventListener('change', function(event) {
+      radioHandler(event);
+    });
+    optionUnpaidElement.addEventListener('change', function(event) {
+      radioHandler(event);
+    });
+    optionUnbilledElement.addEventListener('change', function(event) {
+      radioHandler(event);
+    });
+    scbIcon.addEventListener('click', paymentMethodClickHandler);
+    bblIcon.addEventListener('click', paymentMethodClickHandler);
+    kbankIcon.addEventListener('click', paymentMethodClickHandler);
+    cashIcon.addEventListener('click', paymentMethodClickHandler);
+  };
+  var checkUserPermission = function() {
+    var userRef = firebase.database().ref('authorization/users');
+    var whitelisted = false;
+    userRef.once('value').then(function(snapshot) {
+      var usersObj = snapshot.val();
+      for (var user in usersObj) {
+        if (usersObj.hasOwnProperty(user)) {
+          if (userEmail === usersObj[user].email) {
+            whitelisted = true;
+            break;
+          }
+        }
+      }
+      if (whitelisted) {
+        // app main workflow
+        initDatabase();
+        registerDomEvent();
+      } else {
+        showPermissionDeniedDialog();
+      }
+    });
+  };
   return {
-    initDatabase: function() {
+    /*initDatabase: function() {
       var firebaseRef = firebase.database().ref();
       var roomsRef = firebaseRef.child('rooms');
       var floorsRef = firebaseRef.child('floors');
@@ -770,12 +1069,56 @@ var App = (function() {
       bblIcon.addEventListener('click', paymentMethodClickHandler);
       kbankIcon.addEventListener('click', paymentMethodClickHandler);
       cashIcon.addEventListener('click', paymentMethodClickHandler);
+    },*/
+    handleLoginProcess: function() {
+      // register dom event for login process first
+      var signInBtn = document.querySelector('#google-sign-in-btn');
+      var signOutBtn = document.querySelector('#google-sign-out-btn');
+
+      signInBtn.addEventListener('click', function() {
+        firebase.auth().signInWithPopup(provider).then(function() {
+          console.log('sign in clicked.');
+          closeLoginOverlay();
+        }, function(error) {
+          console.log(error);
+        });
+      });
+
+      signOutBtn.addEventListener('click', function() {
+        firebase.auth().signOut().then(function() {
+          console.log('sign out clicked.');
+          closePermissionDeniedDialog();
+        });
+      });
+
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          console.log('logged in.');
+          userDisplayName = firebase.auth().currentUser.displayName;
+          userEmail = firebase.auth().currentUser.email;
+          checkUserPermission();
+        } else {
+          console.log('not logged in.');
+          showLoginOverlay();
+        }
+      });
+
+      /*// otherwise show login popup
+      if (firebase.auth().currentUser === null) {
+        showLoginOverlay();
+      // if sign in already, check the permission of that user
+      } else {
+        userDisplayName = firebase.auth().currentUser.displayName;
+        userEmail = firebase.auth().currentUser.email;
+        checkUserPermission();
+      }*/
     }
   };
 })();
 
 $(document).ready(function() {
-  App.initDatabase();
-  App.registerDomEvent();
+  App.handleLoginProcess();
+  //App.initDatabase();
+  //App.registerDomEvent();
 });
 

@@ -34,6 +34,16 @@ html, body {
   cursor: pointer;
 }
 
+.login-overlay {
+  height: 0%;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(189, 189, 189, 1);
+  overflow-y: hidden;
+}
+
 .overlay {
   height: 0%;
   width: 100%;
@@ -115,6 +125,10 @@ html, body {
 .right {
   float: right;
 }
+.modified-text {
+  font-size: 12px;
+  font-style: italic;
+}
 .dataTable th {
   font-size: 16px;
 }
@@ -122,6 +136,9 @@ html, body {
   font-size: 18px;
 }
 @media (max-width: 840px) {
+  .mdl-layout__content {
+    overflow-x: auto;
+  }
   #floor1-card-container {
     zoom: 0.7;
   }
@@ -139,5 +156,8 @@ html, body {
   }
   #ledger-table-container {
     zoom: 0.7;
+  }
+  #header-menu-button {
+    display: none;
   }
 }

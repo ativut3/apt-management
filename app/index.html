@@ -57,11 +57,45 @@
   </head>
   <body>
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <div id="permission-denied-container" class="login-overlay">
+        <div class="overlay-content">
+          <div class="mdl-card mdl-shadow--6dp">
+            <div class="mdl-card__title mdl-color--primary mdl-color-text--white">
+              <h2 id="permission-card-header" class="mdl-card__title-text">:: Not Authorized ::</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <div id="permission-text-container">
+                <span>You do not have permission to use the app. Please contact the administrator.</span>
+              </div>
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <button id="google-sign-out-btn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Sign out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="login-container" class="login-overlay">
+        <div class="overlay-content">
+          <div class="mdl-card mdl-shadow--6dp">
+            <div class="mdl-card__title mdl-color--primary mdl-color-text--white">
+              <h2 id="login-card-header" class="mdl-card__title-text">:: RB Place Login ::</h2>
+            </div>
+            <div class="mdl-card__supporting-text">
+              <div id="login-text-container">
+                <span>Please sign in by clicking the button below.</span>
+              </div>
+            </div>
+            <div class="mdl-card__actions mdl-card--border">
+              <button id="google-sign-in-btn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Sign in via Google</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div id="confirmation-container" class="overlay">
         <div class="overlay-content">
           <div class="mdl-card mdl-shadow--6dp">
             <div class="mdl-card__title mdl-color--primary mdl-color-text--white">
-              <h2 id="room-card-header" class="mdl-card__title-text">Are you sure?</h2>
+              <h2 id="confirmation-card-header" class="mdl-card__title-text">Are you sure?</h2>
             </div>
             <div class="mdl-card__supporting-text">
               <div id="confirmation-text-container">
@@ -122,6 +156,8 @@
                   <textarea class="mdl-textfield__input" type="text" rows= "2" id="notes-input"></textarea>
                   <label class="mdl-textfield__label" for="notes-input">Notes</label>
                 </div>
+                <div id="modified-by-container">
+                </div>
             </div>
             <div class="mdl-card__actions mdl-card--border">
               <button id="save-btn" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Save</button>
@@ -133,8 +169,7 @@
       <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
           <span class="mdl-layout-title">
-            <img src="images/logo.png" width="70" height="70">
-            RB Place
+            <img src="images/logo.png" width="50" height="50">
           </span>
           <div class="mdl-layout-spacer"></div>
           <div id="month-input-container" class="mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right">
@@ -150,7 +185,7 @@
           </button>
           <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="header-menu-button">
             <li id="import-excel-entry" class="mdl-menu__item">Import data from Excel...</li>
-            <li id="download-excel-template-entry" class="mdl-menu__item">Download Excel template file...</li>
+            <li id="download-excel-template-entry" class="mdl-menu__item"><a href="https://www.dropbox.com/s/2d0jdoyfuku4pe8/rbPlaceTemplate.xlsx?dl=0" target="_blank" style="text-decoration: none; color: rgba(0,0,0,.87)">Download Excel template file...</a></li>
           </ul>
           <input id="excel-input" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display: none;">
         </div>
