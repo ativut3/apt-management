@@ -110,9 +110,9 @@ var App = (function() {
     document.getElementById('login-container').style.height = '100%';
     document.getElementById('login-container').style.zIndex = '10';
   };
-  var closeLoginOverlay = function() {
+  /* var closeLoginOverlay = function() {
     document.getElementById('login-container').style.height = '0%';
-  };
+  };*/
   var showOverlay = function() {
     document.getElementById('overlay-container').style.height = '100%';
     document.getElementById('overlay-container').style.zIndex = '10';
@@ -1076,12 +1076,7 @@ var App = (function() {
       var signOutBtn = document.querySelector('#google-sign-out-btn');
 
       signInBtn.addEventListener('click', function() {
-        firebase.auth().signInWithPopup(provider).then(function() {
-          console.log('sign in clicked.');
-          closeLoginOverlay();
-        }, function(error) {
-          console.log(error);
-        });
+        firebase.auth().signInWithRedirect(provider);
       });
 
       signOutBtn.addEventListener('click', function() {
