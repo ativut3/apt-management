@@ -136,6 +136,11 @@ html, body {
   font-size: 18px;
 }
 /* Hack: https://github.com/google/material-design-lite/issues/1072 */
+@media screen and (max-width: 850px) {
+  .mdl-layout__container {
+    position: static;
+  }
+}
 .mdl-layout {
     overflow: visible;
 }
