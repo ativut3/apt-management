@@ -41,7 +41,7 @@ html, body {
   top: 0;
   left: 0;
   background-color: rgba(189, 189, 189, 1);
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .overlay {
@@ -51,14 +51,14 @@ html, body {
   top: 0;
   left: 0;
   background-color: rgba(189, 189, 189, 0.9);
-  overflow-y: hidden;
+  overflow-y: auto;
   transition: 0.5s;
 }
 .overlay-content {
   align-items: center;
   justify-content: center;
   position: relative;
-  top: 10%;
+  top: 5px;
   width: 100%;
   text-align: center;
 }
